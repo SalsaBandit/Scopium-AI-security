@@ -2,6 +2,8 @@
 
 import re
 import os
+import json
+from datetime import datetime
 
 class UserAuthentication:
     # Temporary storage for user data until a secure database is implemented
@@ -10,6 +12,7 @@ class UserAuthentication:
     MAX_LENGTH = 10
     ALPHANUMERIC_PATTERN = r"^[a-zA-Z0-9]+$"
     extLoginAttempts = 0
+    LOGIN_LOG_FILE = "login.json"
 
     @staticmethod
     def main():
@@ -94,6 +97,31 @@ class UserAuthentication:
                 print("and must be no more than 10 characters total.\n")
 
         return logged_in
+    
+    @staticmethod
+    def log_login_event(username, success):
+            """Logs a login event with the current timestamp, username, and status in JSON format"""
+            timestamp = datetime.now().strftime("%Y-&m-%d %H:%M:%S")
+            status = "Success" if success else "Failure"
+            login_event = {
+                "timestamp": timestamp,
+                "username": username,
+                "status": status
+            }
+
+            # Load existing dta if the file exists, otherwise start with an empty list
+            if os.path.exists(UserAuthentication.LOGIN_LOG_FILE):
+                with open(UserAuthentication.LOGIN_LOG_FILE, 'r') as file:
+                    data = json.load(file)
+            else:
+                data = []
+
+            # Append the new login event
+            data.append(login_event)
+
+            # Write the updated data back to the JSON file
+            with open(UserAuthentication.LOGIN_LOG_FILE, 'w') as file:
+                json.dump(data, file, indent=4)
 
     @staticmethod
     def login_user_external(username, password):
