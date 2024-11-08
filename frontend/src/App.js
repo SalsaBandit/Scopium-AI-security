@@ -5,18 +5,40 @@ import './App.css';
 function App() {
     const [message, setMessage] = useState("");
     const [activeSection, setActiveSection] = useState("home"); // State to manage displayed content section.
+    const [logs, setLogs] = useState([]); // Stores log data.
+    const [searchTerm, setSearchTerm] = useState(""); // Search term for filtering logs.
+    const [sortField, setSortField] = useState("timestamp"); // Field to sort by.
+    const [sortOrder, setSortOrder] = useState("asc"); // Sort order (asc or desc).
 
-    // Fetches message from django backend to demonstrate connectivity.
+    // Fetches from django backend.
     useEffect(() => {
         axios.get('/api/hello/')
             .then(response => setMessage(response.data.message))
             .catch(error => console.log(error));
+
+        axios.get('/api/logs/')
+            .then(response => setLogs(response.data.logs))
+            .catch(error => console.log(error));
     }, []);
 
-    // Function to set the active section to "User Activity Logs".
-    const navigateToUserActivityLogs = () => {
-        setActiveSection("userActivityLogs");
+    // Function to sort logs by the selected field and order.
+    const handleSort = (field) => {
+        const order = sortField === field && sortOrder === "asc" ? "desc" : "asc";
+        setSortField(field);
+        setSortOrder(order);
+        const sortedLogs = [...logs].sort((a, b) => {
+            if (order === "asc") return a[field] > b[field] ? 1 : -1;
+            return a[field] < b[field] ? 1 : -1;
+        });
+        setLogs(sortedLogs);
     };
+
+    // Filter logs based on the search term.
+    const filteredLogs = logs.filter(log =>
+        log.user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        log.event.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        log.ip_address.includes(searchTerm)
+    );
 
     return (
         <>
@@ -30,7 +52,7 @@ function App() {
                 </header>
                 <nav className="navbar">
                     <button onClick={() => setActiveSection("home")}>Home</button>
-                    <button onClick={navigateToUserActivityLogs}>User Activity Logs</button>
+                    <button onClick={() => setActiveSection("userActivityLogs")}>User Activity Logs</button>
                     <button onClick={() => setActiveSection("complianceReports")}>Compliance Reports</button>
                     <button onClick={() => setActiveSection("forensicTools")}>Forensic Tools</button>
                 </nav>
@@ -63,9 +85,46 @@ function App() {
                     {activeSection === "userActivityLogs" && (
                         <div className="section user-activity-logs">
                             <h2>User Activity Logs</h2>
-                            <p>Here you can view and analyze user activity logs in detail.</p>
+                            <div className="controls">
+                                <div className="search-container">
+                                    <input
+                                        type="text"
+                                        placeholder="Search logs..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                </div>
+                                <div className="sort-button">
+                                    <button onClick={() => handleSort("timestamp")}>
+                                        Sort by Timestamp {sortField === "timestamp" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+                                    </button>
+                                </div>
+                                <div className="sort-button">
+                                    <button onClick={() => handleSort("user_id")}>
+                                        Sort by User ID {sortField === "user_id" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+                                    </button>
+                                </div>
+                            </div>
+                            <table className="logs-table">
+                                <thead>
+                                    <tr>
+                                        <th className="event-column">Event</th>
+                                        <th className="timestamp-column">Timestamp</th>
+                                        <th className="user-id-column">User ID</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredLogs.map((log, index) => (
+                                        <tr key={index}>
+                                            <td>{log.event}</td>
+                                            <td>{log.timestamp}</td>
+                                            <td>{log.user.user_id}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
-                    )}
+                        )}
                     {activeSection === "complianceReports" && (
                         <div className="section compliance-reports">
                             <h2>Compliance Reports</h2>

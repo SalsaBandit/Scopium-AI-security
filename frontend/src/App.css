@@ -34,11 +34,11 @@ body {
     }
 
         .header button:hover {
-            color: #ffb74d; /* Accent color for hover */
+            color: #ffb74d;
         }
 
         .header button:focus {
-            outline: 2px solid #ffb74d; /* Focus outline */
+            outline: 2px solid #ffb74d;
         }
 
 .navbar {
@@ -61,11 +61,11 @@ body {
 
         .navbar button:hover {
             background-color: #444;
-            color: #ffb74d; /* Accent color for hover */
+            color: #ffb74d;
         }
 
         .navbar button:focus {
-            outline: 2px solid #ffb74d; /* Focus outline */
+            outline: 2px solid #ffb74d;
         }
 
 .content {
@@ -83,6 +83,92 @@ body {
     border-radius: 5px;
 }
 
+/* CSS Styling for User Activity Logs widgets */
+.user-activity-logs {
+    grid-column: span 3;
+    grid-row: span 2;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.user-activity-logs button {
+    background: none;
+    border: none;
+    color: rgb(0, 0, 0);
+    font-size: 1em;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 10px;
+    transition: color 0.3s;
+}
+
+    .user-activity-logs button:hover {
+        color: #ffb74d;
+    }
+
+    .user-activity-logs button:focus {
+        outline: 2px solid #ffb74d;
+    }
+
+.controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    width: 100%;
+    margin-bottom: -10px;
+}
+
+/* Syling for log search box. */
+.search-container {
+    display: inline-flex;
+    flex: 2;
+    align-items: center;
+    justify-content: left;
+    width: 50%;
+}
+
+    .search-container input {
+        width: 50%;
+        padding: 10px;
+        font-size: 1em;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+.sort-button {
+    display: inline-flex;
+    justify-content: left;
+    width: 25%;
+}
+
+th.event-column {
+    width: 50%;
+}
+
+th.timestamp-column, th.user-id-column {
+    width: 25%;
+}
+
+.logs-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.logs-table th, .logs-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.logs-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+/* CSS styling for home page widgets */
 .recent-alerts {
     grid-column: span 1;
 }
