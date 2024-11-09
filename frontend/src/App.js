@@ -10,18 +10,35 @@ function App() {
     const [sortField, setSortField] = useState("timestamp"); // Field to sort by.
     const [sortOrder, setSortOrder] = useState("asc"); // Sort order (asc or desc).
 
-    // Fetches from django backend.
+    // Fetches test message from backend.
     useEffect(() => {
         axios.get('/api/hello/')
             .then(response => setMessage(response.data.message))
             .catch(error => console.log(error));
-
-        axios.get('/api/logs/')
-            .then(response => setLogs(response.data.logs))
-            .catch(error => console.log(error));
     }, []);
 
+    // Fetches logs from backend.
+    useEffect(() => {
+        if (activeSection === "userActivityLogs") {
+            axios.get('/api/get_logs/')
+                .then(response => setLogs(response.data.logs))
+                .catch(error => console.log(error));
+        }
+    }, [activeSection]);
+
+    // Function which calls the backend to create a log.
+    const logEvent = async (event) => {
+        await fetch("/api/log_event/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ event }),
+        });
+    };
+
     // Function to sort logs by the selected field and order.
+    // NOTE: The button which handles sorting by user ID is currently set to sort by timestamp as well!
     const handleSort = (field) => {
         const order = sortField === field && sortOrder === "asc" ? "desc" : "asc";
         setSortField(field);
@@ -35,15 +52,16 @@ function App() {
 
     // Filter logs based on the search term.
     const filteredLogs = logs.filter(log =>
-        log.user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        //log.user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
         log.event.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        log.ip_address.includes(searchTerm)
+        log.timestamp.includes(searchTerm)
     );
 
     return (
         <>
             <div>
                 <h1>{message}</h1>
+                <button onClick={() => logEvent("Button Clicked - Home")}>Home</button>
             </div>
 
             <div className="dashboard">
@@ -100,8 +118,8 @@ function App() {
                                     </button>
                                 </div>
                                 <div className="sort-button">
-                                    <button onClick={() => handleSort("user_id")}>
-                                        Sort by User ID {sortField === "user_id" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+                                    <button onClick={() => handleSort("timestamp")}>
+                                        Sort by User ID {sortField === "timestamp" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
                                     </button>
                                 </div>
                             </div>
@@ -118,7 +136,7 @@ function App() {
                                         <tr key={index}>
                                             <td>{log.event}</td>
                                             <td>{log.timestamp}</td>
-                                            <td>{log.user.user_id}</td>
+                                            {/*<td>{log.user.user_id}</td>*/}
                                         </tr>
                                     ))}
                                 </tbody>
