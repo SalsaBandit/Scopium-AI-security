@@ -1,21 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './App.css';
+import Login from './Login';
 
 function App() {
     const [message, setMessage] = useState("");
     const [activeSection, setActiveSection] = useState("home"); // State to manage displayed content section.
+    const [isAuthenticated, setIsAuthenticated] = useState(false); // Track login status
     const [logs, setLogs] = useState([]); // Stores log data.
     const [searchTerm, setSearchTerm] = useState(""); // Search term for filtering logs.
     const [sortField, setSortField] = useState("timestamp"); // Field to sort by.
     const [sortOrder, setSortOrder] = useState("asc"); // Sort order (asc or desc).
 
-    // Fetches test message from backend.
+    // Fetch a welcome message from the backend
     useEffect(() => {
-        axios.get('/api/hello/')
-            .then(response => setMessage(response.data.message))
-            .catch(error => console.log(error));
-    }, []);
+        if (isAuthenticated) {
+            axios.get('/api/hello/')
+                .then(response => setMessage(response.data.message))
+                .catch(error => console.error(error));
+        }
+    }, [isAuthenticated]);
 
     // Fetches logs from backend.
     useEffect(() => {
@@ -56,6 +60,17 @@ function App() {
         log.event.toLowerCase().includes(searchTerm.toLowerCase()) ||
         log.timestamp.includes(searchTerm)
     );
+
+    // Handle successful login
+    const handleLoginSuccess = () => {
+        setIsAuthenticated(true);
+        setActiveSection("home");
+    };
+
+    // If not authenticated, show the login page
+    if (!isAuthenticated) {
+        return <Login onLoginSuccess={handleLoginSuccess} />;
+    }
 
     return (
         <>

@@ -1,6 +1,7 @@
-from django.http import JsonResponse
 from .models import EventLog
 from .logging import log_event
+from django.http import JsonResponse
+from django.contrib.auth import authenticate, login
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -31,3 +32,18 @@ def log_event_view(request):
         log_event(event=event)
         return JsonResponse({"status": "success", "message": "Log recorded"})
     return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
+
+@csrf_exempt
+def login_view(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        username = data.get('username')
+        password = data.get('password')
+        
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return JsonResponse({'success': True, 'message': 'Login successful'})
+        else:
+            return JsonResponse({'success': False, 'message': 'Invalid credentials'}, status=401)
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
