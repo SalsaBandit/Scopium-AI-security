@@ -3,6 +3,7 @@ from .logging import log_event
 from django.http import JsonResponse
 from django.contrib.auth import authenticate, login
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import json
@@ -47,3 +48,11 @@ def login_view(request):
         else:
             return JsonResponse({'success': False, 'message': 'Invalid credentials'}, status=401)
     return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+# Automatically create a test user on server startup if it doesn't exist
+# Remove before production
+def create_test_user():
+    if not User.objects.filter(username='USER1').exists():
+        User.objects.create_user('USER1', 'test@example.com', 'PW123')
+
+create_test_user()
