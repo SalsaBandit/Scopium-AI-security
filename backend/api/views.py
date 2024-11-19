@@ -56,3 +56,15 @@ def create_test_user():
         User.objects.create_user('USER1', 'test@example.com', 'PW123')
 
 create_test_user()
+
+@api_view(['GET'])
+def account_page(request):
+    # Example data for the "Account" page
+    boxes = [
+        {"title": "Recent Alerts", "content": "A list view with color-coded severity levels (critical, high, moderate)."},
+        {"title": "Data Transfer Monitor", "content": "A bar chart showing transfer volumes over time."},
+        {"title": "Recent Logs", "content": "A list view of recent logs with details."},
+        {"title": "User Activity Monitor", "content": "A line graph showing user activity over time."},
+    ]
+    return Response({"boxes": boxes})
+
