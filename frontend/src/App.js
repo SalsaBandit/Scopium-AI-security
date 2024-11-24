@@ -1,26 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './App.css';
-import Login from './Login';
 
 function App() {
     const [message, setMessage] = useState("");
     const [activeSection, setActiveSection] = useState("home"); // State to manage displayed content section.
-    const [isAuthenticated, setIsAuthenticated] = useState(false); // Track login status
     const [logs, setLogs] = useState([]); // Stores log data.
     const [searchTerm, setSearchTerm] = useState(""); // Search term for filtering logs.
     const [sortField, setSortField] = useState("timestamp"); // Field to sort by.
     const [sortOrder, setSortOrder] = useState("asc"); // Sort order (asc or desc).
-    const [accountBoxes, setAccountBoxes] = useState([]); // State for Account page boxes.
 
-    // Fetch a welcome message from the backend
+    // Fetches test message from backend.
     useEffect(() => {
-        if (isAuthenticated) {
-            axios.get('/api/hello/')
-                .then(response => setMessage(response.data.message))
-                .catch(error => console.error(error));
-        }
-    }, [isAuthenticated]);
+        axios.get('/api/hello/')
+            .then(response => setMessage(response.data.message))
+            .catch(error => console.log(error));
+    }, []);
 
     // Fetches logs from backend.
     useEffect(() => {
@@ -28,15 +23,6 @@ function App() {
             axios.get('/api/get_logs/')
                 .then(response => setLogs(response.data.logs))
                 .catch(error => console.log(error));
-        }
-    }, [activeSection]);
-
-    // Fetch Account page data
-    useEffect(() => {
-        if (activeSection === "account") {
-            axios.get('/api/account/')
-                .then(response => setAccountBoxes(response.data.boxes))
-                .catch(error => console.error('Error fetching account data:', error));
         }
     }, [activeSection]);
 
@@ -52,6 +38,7 @@ function App() {
     };
 
     // Function to sort logs by the selected field and order.
+    // NOTE: The button which handles sorting by user ID is currently set to sort by timestamp as well!
     const handleSort = (field) => {
         const order = sortField === field && sortOrder === "asc" ? "desc" : "asc";
         setSortField(field);
@@ -65,20 +52,10 @@ function App() {
 
     // Filter logs based on the search term.
     const filteredLogs = logs.filter(log =>
+        //log.user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
         log.event.toLowerCase().includes(searchTerm.toLowerCase()) ||
         log.timestamp.includes(searchTerm)
     );
-
-    // Handle successful login
-    const handleLoginSuccess = () => {
-        setIsAuthenticated(true);
-        setActiveSection("home");
-    };
-
-    // If not authenticated, show the login page
-    if (!isAuthenticated) {
-        return <Login onLoginSuccess={handleLoginSuccess} />;
-    }
 
     return (
         <>
@@ -89,7 +66,7 @@ function App() {
 
             <div className="dashboard">
                 <header className="header">
-                    <button onClick={() => setActiveSection("account")}>Account</button>
+                    <button>Account</button>
                 </header>
                 <nav className="navbar">
                     <button onClick={() => setActiveSection("home")}>Home</button>
@@ -97,7 +74,7 @@ function App() {
                     <button onClick={() => setActiveSection("complianceReports")}>Compliance Reports</button>
                     <button onClick={() => setActiveSection("forensicTools")}>Forensic Tools</button>
                 </nav>
-
+                
                 <div className="content">
                     {activeSection === "home" && (
                         <>
@@ -126,9 +103,46 @@ function App() {
                     {activeSection === "userActivityLogs" && (
                         <div className="section user-activity-logs">
                             <h2>User Activity Logs</h2>
-                            {/* ... existing logs implementation ... */}
+                            <div className="controls">
+                                <div className="search-container">
+                                    <input
+                                        type="text"
+                                        placeholder="Search logs..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                </div>
+                                <div className="sort-button">
+                                    <button onClick={() => handleSort("timestamp")}>
+                                        Sort by Timestamp {sortField === "timestamp" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+                                    </button>
+                                </div>
+                                <div className="sort-button">
+                                    <button onClick={() => handleSort("timestamp")}>
+                                        Sort by User ID {sortField === "timestamp" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+                                    </button>
+                                </div>
+                            </div>
+                            <table className="logs-table">
+                                <thead>
+                                    <tr>
+                                        <th className="event-column">Event</th>
+                                        <th className="timestamp-column">Timestamp</th>
+                                        <th className="user-id-column">User ID</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredLogs.map((log, index) => (
+                                        <tr key={index}>
+                                            <td>{log.event}</td>
+                                            <td>{log.timestamp}</td>
+                                            {/*<td>{log.user.user_id}</td>*/}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
-                    )}
+                        )}
                     {activeSection === "complianceReports" && (
                         <div className="section compliance-reports">
                             <h2>Compliance Reports</h2>
@@ -141,168 +155,6 @@ function App() {
                             <p>Tools for forensic analysis are displayed here.</p>
                         </div>
                     )}
-                    {activeSection === "account" && (
-                        <div className="section account">
-                            <h2>Personal Information</h2>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
-                                {/* Account Boxes */}
-                                {accountBoxes.map((box, index) => (
-                                    <div
-                                        key={index}
-                                        style={{
-                                            border: '1px solid black',
-                                            padding: '10px',
-                                            margin: '10px',
-                                            width: '200px',
-                                            borderRadius: '8px',
-                                            boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-                                            backgroundColor: '#fff',
-                                        }}
-                                    >
-                                        <h3>{box.title}</h3>
-                                        <p>{box.content}</p>
-                                    </div>
-                                ))}
-
-                                {/* Additional Account Content */}
-                                <div style={{
-                                    flex: '1 1 100%', // Ensures full width if needed
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    gap: '20px',
-                                    marginTop: '20px',
-                                }}>
-
-                                    <div className="section name-information" style={{
-                                        border: '1px solid #ddd',
-                                        borderRadius: '8px',
-                                        padding: '20px',
-                                        backgroundColor: '#fff',
-                                        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-                                    }}>
-                                        <h2>Name</h2>
-                                        <p>Name</p>
-                                    </div>
-
-                                    <div className="section username-information" style={{
-                                        border: '1px solid #ddd',
-                                        borderRadius: '8px',
-                                        padding: '20px',
-                                        backgroundColor: '#fff',
-                                        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-                                    }}>
-                                        <h2>Username</h2>
-                                        <p>Username</p>
-                                    </div>
-
-                                    <div className="section email-information" style={{
-                                        border: '1px solid #ddd',
-                                        borderRadius: '8px',
-                                        padding: '20px',
-                                        backgroundColor: '#fff',
-                                        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-                                    }}>
-                                        <h2>Recent Logs</h2>
-                                        <p>Email</p>
-                                    </div>
-
-                                    <div className="section number-information" style={{
-                                        border: '1px solid #ddd',
-                                        borderRadius: '8px',
-                                        padding: '20px',
-                                        backgroundColor: '#fff',
-                                        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-                                    }}>
-                                        <h2>Phone Number</h2>
-                                        <p>Phone Number</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {activeSection === "account" && (
-                        <div className="section account">
-                            <h2>Additional Information</h2>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
-                                {/* Account Boxes */}
-                                {accountBoxes.map((box, index) => (
-                                    <div
-                                        key={index}
-                                        style={{
-                                            border: '1px solid black',
-                                            padding: '10px',
-                                            margin: '10px',
-                                            width: '200px',
-                                            borderRadius: '8px',
-                                            boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-                                            backgroundColor: '#fff',
-                                        }}
-                                    >
-                                        <h3>{box.title}</h3>
-                                        <p>{box.content}</p>
-                                    </div>
-                                ))}
-
-                                {/* Additional Account Content */}
-                                <div style={{
-                                    flex: '1 1 100%', // Ensures full width if needed
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    gap: '20px',
-                                    marginTop: '20px',
-                                }}>
-
-                                    <div className="section role-information" style={{
-                                        border: '1px solid #ddd',
-                                        borderRadius: '8px',
-                                        padding: '20px',
-                                        backgroundColor: '#fff',
-                                        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-                                    }}>
-                                        <h2>User Role</h2>
-                                        <p>User Role</p>
-                                    </div>
-
-                                    <div className="section account-information" style={{
-                                        border: '1px solid #ddd',
-                                        borderRadius: '8px',
-                                        padding: '20px',
-                                        backgroundColor: '#fff',
-                                        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-                                    }}>
-                                        <h2>Account Created</h2>
-                                        <p>Account Created</p>
-                                    </div>
-
-                                    <div className="section login-information" style={{
-                                        border: '1px solid #ddd',
-                                        borderRadius: '8px',
-                                        padding: '20px',
-                                        backgroundColor: '#fff',
-                                        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-                                    }}>
-                                        <h2>Last Login</h2>
-                                        <p>Last Login</p>
-                                    </div>
-
-                                    <div className="section password-information" style={{
-                                        border: '1px solid #ddd',
-                                        borderRadius: '8px',
-                                        padding: '20px',
-                                        backgroundColor: '#fff',
-                                        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-                                    }}>
-                                        <h2>Password Last Changed</h2>
-                                        <p>Password Last Changed</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-
-
                 </div>
             </div>
         </>
