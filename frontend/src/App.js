@@ -107,13 +107,11 @@ function App() {
         <>
             <div>
                 <h1>{message}</h1>
-                <button onClick={() => logEvent("Button Clicked - Home")}>Home</button>
             </div>
 
             <div className="dashboard">
                 <header className="header">
                     <button onClick={() => setActiveSection("account")}>Account</button>
-                    <button>Account</button>
                     <div style={{ marginTop: '5px' }}>
                     <button
                         onClick={handleLogout}
