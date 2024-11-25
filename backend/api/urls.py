@@ -8,4 +8,5 @@ urlpatterns = [
     path("api/get_logs/", views.get_logs, name="get_logs"),
     path('api/account/', views.account_page, name='account_page'),
     path('api/logout/', views.logout_view, name='logout'),
+    path('api/get_current_user/', views.get_current_user, name='get_current_user'),
 ]

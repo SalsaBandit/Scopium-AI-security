@@ -12,6 +12,7 @@ function App() {
     const [sortField, setSortField] = useState("timestamp"); // Field to sort by.
     const [sortOrder, setSortOrder] = useState("asc"); // Sort order (asc or desc).
     const [accountBoxes, setAccountBoxes] = useState([]); // State for Account page boxes.
+    const [currentUserId, setCurrentUserId] = useState(null); // State for User ID
 
     // Fetch a welcome message from the backend
     useEffect(() => {
@@ -41,14 +42,24 @@ function App() {
     }, [activeSection]);
 
     // Function which calls the backend to create a log.
-    const logEvent = async (event) => {
-        await fetch("/api/log_event/", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ event }),
-        });
+    const logEvent = async (event, userId = null) => {
+        try {
+            const payload = {
+                event,
+                user_id: userId || null, // Include User ID (default to null if not available)
+                timestamp: new Date().toISOString(),
+            };
+    
+            await fetch("/api/log_event/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+            });
+        } catch (error) {
+            console.error("Error logging event:", error);
+        }
     };
 
     // Function to sort logs by the selected field and order.
@@ -70,9 +81,19 @@ function App() {
     );
 
     // Handle successful login
-    const handleLoginSuccess = () => {
-        setIsAuthenticated(true);
-        setActiveSection("home");
+    const handleLoginSuccess = async () => {
+        try {
+            const response = await fetch('/api/get_current_user/', {
+                method: 'GET',
+                credentials: 'include', // Include session cookies
+            });
+            const data = await response.json();
+            setCurrentUserId(data.id); // Store the User ID
+            setIsAuthenticated(true);
+            setActiveSection("home");
+        } catch (error) {
+            console.error("Error fetching user info:", error);
+        }
     };
 
     // Handle logout
@@ -111,7 +132,13 @@ function App() {
 
             <div className="dashboard">
                 <header className="header">
-                    <button onClick={() => setActiveSection("account")}>Account</button>
+                    <button onClick={() => {
+                        setActiveSection("account");
+                        logEvent("Navigated to Account Page", currentUserId);
+                        }}
+                    >
+                        Account
+                    </button>
                     <div style={{ marginTop: '5px' }}>
                     <button
                         onClick={handleLogout}
@@ -129,10 +156,10 @@ function App() {
                 </div>
                 </header>
                 <nav className="navbar">
-                    <button onClick={() => setActiveSection("home")}>Home</button>
-                    <button onClick={() => setActiveSection("userActivityLogs")}>User Activity Logs</button>
-                    <button onClick={() => setActiveSection("complianceReports")}>Compliance Reports</button>
-                    <button onClick={() => setActiveSection("forensicTools")}>Forensic Tools</button>
+                    <button onClick={() => {setActiveSection("home"); logEvent("Navigated to Home", currentUserId);}}>Home</button>
+                    <button onClick={() => {setActiveSection("userActivityLogs"); logEvent("Navigated to User Activity Logs", currentUserId);}}>User Activity Logs</button>
+                    <button onClick={() => {setActiveSection("complianceReports"); logEvent("Navigated to Compliance Reports", currentUserId);}}>Compliance Reports</button>
+                    <button onClick={() => {setActiveSection("forensicTools"); logEvent("Navigated to Forensic Tools", currentUserId);}}>Forensic Tools</button>
                 </nav>
 
                 <div className="content">

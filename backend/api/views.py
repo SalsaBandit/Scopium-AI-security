@@ -4,6 +4,8 @@ from django.http import JsonResponse
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+from django.utils.timezone import now
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import json
@@ -32,7 +34,23 @@ def log_event_view(request):
     if request.method == "POST":
         data = json.loads(request.body)
         event = data.get("event", "")
-        log_event(event=event)
+        user_id = data.get("user_id", None)  # Get user_id from the payload
+        timestamp = data.get("timestamp", now().isoformat())
+        #log_event(event=event)
+        user = None
+        if user_id:
+            try:
+                from django.contrib.auth.models import User
+                user = User.objects.get(id=user_id)
+            except User.DoesNotExist:
+                pass
+
+        # Create a new log entry
+        EventLog.objects.create(
+            event=event,
+            timestamp=timestamp,
+            user=user,  # Save the associated user
+        )
         return JsonResponse({"status": "success", "message": "Log recorded"})
     return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
 '''
@@ -103,3 +121,8 @@ def login_view(request):
         else:
             return JsonResponse({'success': False, 'message': 'Invalid credentials'}, status=401)
     return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+@login_required
+def get_current_user(request):
+    user = request.user
+    return JsonResponse({"id": user.id, "username": user.username})
