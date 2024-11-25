@@ -75,6 +75,29 @@ function App() {
         setActiveSection("home");
     };
 
+    // Handle logout
+    const handleLogout = async () => {
+        try {
+            const response = await fetch('http://localhost:8000/api/logout/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',  // Include session cookies
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                alert(data.message); // Show logout confirmation
+                setIsAuthenticated(false); // Redirect to login
+                setActiveSection('login');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred during logout.');
+        }
+    };
+
     // If not authenticated, show the login page
     if (!isAuthenticated) {
         return <Login onLoginSuccess={handleLoginSuccess} />;
@@ -90,6 +113,22 @@ function App() {
             <div className="dashboard">
                 <header className="header">
                     <button onClick={() => setActiveSection("account")}>Account</button>
+                    <button>Account</button>
+                    <div style={{ marginTop: '5px' }}>
+                    <button
+                        onClick={handleLogout}
+                        style={{
+                            backgroundColor: '#ff4d4d',
+                            color: 'white',
+                            padding: '5px 10px',
+                            border: 'none',
+                            cursor: 'pointer',
+                            borderRadius: '3px',
+                        }}
+                    >
+                        Logout
+                    </button>
+                </div>
                 </header>
                 <nav className="navbar">
                     <button onClick={() => setActiveSection("home")}>Home</button>
@@ -158,8 +197,9 @@ function App() {
                                     {filteredLogs.map((log, index) => (
                                         <tr key={index}>
                                             <td>{log.event}</td>
-                                            <td>{log.timestamp}</td>
-                                            {/*<td>{log.user.user_id}</td>*/}
+                                            <td>{new Date(log.timestamp).toLocaleString()}</td>
+                                            {/*<td>{log.timestamp}</td>*/}
+                                            <td>{log.user_id || "N/A"}</td>
                                         </tr>
                                     ))}
                                 </tbody>

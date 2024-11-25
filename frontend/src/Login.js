@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+/*
 const Login = ({ onLoginSuccess }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -50,6 +50,47 @@ const Login = ({ onLoginSuccess }) => {
             </div>
             <br />
             <button type="button" onClick={handleLogin}>Login</button>
+            <br />
+            {message && <p>{message}</p>}
+        </div>
+    );
+};
+
+export default Login;
+*/
+
+//Login for testing without entering credentials, *****REMOVE BEFORE PRODUCTION*****
+const Login = ({ onLoginSuccess }) => {
+    const [message, setMessage] = useState('');
+
+    const handleLogin = async () => {
+        try {
+            const response = await fetch('/api/login/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username: '', password: '' }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                onLoginSuccess();
+            } else {
+                setMessage(data.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            setMessage('Something went wrong. Please try again.');
+        }
+    };
+
+    return (
+        <div style={{ textAlign: 'center', marginTop: '50px' }}>
+            <h2>Login</h2>
+            <button type="button" onClick={handleLogin}>
+                Login (Test User)
+            </button>
             <br />
             {message && <p>{message}</p>}
         </div>
