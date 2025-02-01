@@ -31,22 +31,23 @@ const Login = ({ onLoginSuccess }) => {
     return (
         <div className="login-overlay">
             <div className="login-popup">
-                <h2>Login</h2>
+                <h2>Login</h2><br/>
+                <p>[DEBUG] Use 'test' for USER & PASS</p><br/>
                 <div>
-                    <label>Username:</label><br />
                     <input 
-                        type="text" 
-                        value={username} 
-                        onChange={(e) => setUsername(e.target.value)} 
+                        type="text"
+                        placeholder="Username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
                     />
                 </div>
                 <br />
                 <div>
-                    <label>Password:</label><br />
                     <input 
-                        type="password" 
-                        value={password} 
-                        onChange={(e) => setPassword(e.target.value)} 
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                     />
                 </div>
                 <br />

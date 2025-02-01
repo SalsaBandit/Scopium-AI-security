@@ -52,8 +52,8 @@ def login_view(request):
 # Automatically create a test user on server startup if it doesn't exist
 # Remove before production
 def create_test_user():
-    if not User.objects.filter(username='USER1').exists():
-        User.objects.create_user('USER1', 'test@example.com', 'PW123')
+    if not User.objects.filter(username='test').exists():
+        User.objects.create_user('test', 'test@example.com', 'test')
 
 create_test_user()
 
