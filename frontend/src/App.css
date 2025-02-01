@@ -208,3 +208,10 @@ th.timestamp-column, th.user-id-column {
     text-align: center;
     width: 300px;
 }
+
+/* Blur Home Screen when not Authenticated */
+.blur-background {
+    filter: blur(5px);
+    pointer-events: none;
+    user-select: none;
+}

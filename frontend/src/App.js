@@ -13,15 +13,6 @@ function App() {
     const [sortOrder, setSortOrder] = useState("asc"); // Sort order (asc or desc).
     const [accountBoxes, setAccountBoxes] = useState([]); // State for Account page boxes.
 
-    // Fetch a welcome message from the backend.
-    useEffect(() => {
-        if (isAuthenticated) {
-            axios.get('/api/hello/')
-                .then(response => setMessage(response.data.message))
-                .catch(error => console.error(error));
-        }
-    }, [isAuthenticated]);
-
     // Fetches logs from backend.
     useEffect(() => {
         if (activeSection === "userActivityLogs") {
@@ -70,20 +61,22 @@ function App() {
     );
 
     // Handle successful login.
-    const handleLoginSuccess = () => {
+    const handleLoginSuccess = async () => {
         setIsAuthenticated(true);
         setActiveSection("home");
+
+        // Log the authentication event.
+        try {
+            await logEvent("User Authenticated");
+        } catch (error) {
+            console.error("Failed To Log Authentication:", error);
+        }
     };
 
     return (
         <>
             {!isAuthenticated && <Login onLoginSuccess={handleLoginSuccess} />}
-            <div>
-                <h1>{message}</h1>
-                <button onClick={() => logEvent("Button Clicked - Home")}>Home</button>
-            </div>
-
-            <div className="dashboard">
+            <div className={`dashboard ${!isAuthenticated ? "blur-background" : ""}`}>
                 <header className="header">
                     <button onClick={() => setActiveSection("account")}>Account</button>
                 </header>
