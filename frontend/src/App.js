@@ -1,28 +1,81 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
 import './App.css';
 import Login from './Login';
+
+// Register Chart.js components.
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend
+  );
 
 function App() {
     const [message, setMessage] = useState("");
     const [activeSection, setActiveSection] = useState("home"); // State to manage displayed content section.
     const [isAuthenticated, setIsAuthenticated] = useState(false); // Track login status
     const [logs, setLogs] = useState([]); // Stores log data.
+    const [chartData, setChartData] = useState(null);
     const [searchTerm, setSearchTerm] = useState(""); // Search term for filtering logs.
     const [sortField, setSortField] = useState("timestamp"); // Field to sort by.
     const [sortOrder, setSortOrder] = useState("asc"); // Sort order (asc or desc).
     const [accountBoxes, setAccountBoxes] = useState([]); // State for Account page boxes.
 
-    // Fetches logs from backend.
+    // Fetches logs from backend after authentication.
     useEffect(() => {
-        if (activeSection === "userActivityLogs") {
+        if (isAuthenticated) {
             axios.get('/api/get_logs/')
                 .then(response => setLogs(response.data.logs))
                 .catch(error => console.log(error));
         }
     }, [activeSection]);
 
-    // Fetch Account page data
+    // Fetch log data for User Activity Monitor widget.
+    const aggregateLogsByDate = (logs) => {
+        const countsByDate = logs.reduce((acc, log) => {
+          const date = new Date(log.timestamp).toLocaleDateString();
+          acc[date] = (acc[date] || 0) + 1;
+          return acc;
+        }, {});
+      
+        const dates = Object.keys(countsByDate).sort((a, b) => new Date(a) - new Date(b));
+        const counts = dates.map(date => countsByDate[date]);
+        return { dates, counts };
+      };
+      
+      // Render chart data.
+      useEffect(() => {
+        if (activeSection === "home" && logs.length > 0) {
+          const aggregated = aggregateLogsByDate(logs);
+          const data = {
+            labels: aggregated.dates,
+            datasets: [{
+              label: 'Logs/Day',
+              data: aggregated.counts,
+              borderColor: '#ffb74d',
+              tension: 0.1,
+            }]
+          };
+          setChartData(data);
+        }
+      }, [activeSection, logs]);
+
+    // Fetch Account page data.
     useEffect(() => {
         if (activeSection === "account") {
             axios.get('/api/account/')
@@ -106,9 +159,23 @@ function App() {
                                 <p>Interacting will expand logs for full detail.</p>
                             </div>
                             <div className="section user-activity-monitor">
-                                <h2>User Activity Monitor</h2>
-                                <p>A line graph showing user activity over time (anomalous spikes in red).</p>
-                                <p>Inline notification flags for flagged activity.</p>
+                                <h2>User Activity Monitor</h2><br/>
+                                <div style={{ width: '100%', height: '80%' }}>
+                                    {chartData ? (
+                                        <Line
+                                        data={chartData}
+                                        options={{
+                                            responsive: true,
+                                            maintainAspectRatio: false,
+                                            plugins: {
+                                            legend: { position: 'left' },
+                                            },
+                                        }}
+                                        />
+                                    ) : (
+                                        <p>Loading chart...</p>
+                                    )}
+                                </div>
                             </div>
                         </>
                     )}
@@ -148,7 +215,6 @@ function App() {
                                         <tr key={index}>
                                             <td>{log.event}</td>
                                             <td>{log.timestamp}</td>
-                                            {/*<td>{log.user.user_id}</td>*/}
                                         </tr>
                                     ))}
                                 </tbody>
@@ -192,7 +258,7 @@ function App() {
 
                                 {/* Additional Account Content */}
                                 <div style={{
-                                    flex: '1 1 100%', // Ensures full width if needed
+                                    flex: '1 1 100%',
                                     display: 'flex',
                                     flexDirection: 'column',
                                     gap: '20px',
@@ -246,7 +312,6 @@ function App() {
                             </div>
                         </div>
                     )}
-
                     {activeSection === "account" && (
                         <div className="section account">
                             <h2>Additional Information</h2>
@@ -272,7 +337,7 @@ function App() {
 
                                 {/* Additional Account Content */}
                                 <div style={{
-                                    flex: '1 1 100%', // Ensures full width if needed
+                                    flex: '1 1 100%',
                                     display: 'flex',
                                     flexDirection: 'column',
                                     gap: '20px',
@@ -326,9 +391,6 @@ function App() {
                             </div>
                         </div>
                     )}
-
-
-
                 </div>
             </div>
         </>
