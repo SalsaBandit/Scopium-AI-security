@@ -13,7 +13,7 @@ function App() {
     const [sortOrder, setSortOrder] = useState("asc"); // Sort order (asc or desc).
     const [accountBoxes, setAccountBoxes] = useState([]); // State for Account page boxes.
 
-    // Fetch a welcome message from the backend
+    // Fetch a welcome message from the backend.
     useEffect(() => {
         if (isAuthenticated) {
             axios.get('/api/hello/')
@@ -69,19 +69,15 @@ function App() {
         log.timestamp.includes(searchTerm)
     );
 
-    // Handle successful login
+    // Handle successful login.
     const handleLoginSuccess = () => {
         setIsAuthenticated(true);
         setActiveSection("home");
     };
 
-    // If not authenticated, show the login page
-    if (!isAuthenticated) {
-        return <Login onLoginSuccess={handleLoginSuccess} />;
-    }
-
     return (
         <>
+            {!isAuthenticated && <Login onLoginSuccess={handleLoginSuccess} />}
             <div>
                 <h1>{message}</h1>
                 <button onClick={() => logEvent("Button Clicked - Home")}>Home</button>
