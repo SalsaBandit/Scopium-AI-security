@@ -12,7 +12,11 @@ import json
 
 @api_view(['GET'])
 def hello_world(request):
-    return Response({"message": "Hello, world!"})
+    user = request.user
+    if user.is_authenticated:
+        return Response({"message": f"Hello, {user.username}!"})
+    else:
+        return Response({"message": "Hello, Guest!"})
 
 # API endpoint to retrieve all event logs in JSON format.
 def get_logs(request):
