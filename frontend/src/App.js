@@ -57,6 +57,12 @@ function App() {
         const counts = dates.map(date => countsByDate[date]);
         return { dates, counts };
       };
+
+      // Function to log out the user
+    const handleLogout = () => {
+        setIsAuthenticated(false);
+        setActiveSection("login"); // Redirect user to login after logout
+    };
       
       // Render chart data.
       useEffect(() => {
@@ -132,6 +138,7 @@ function App() {
             <div className={`dashboard ${!isAuthenticated ? "blur-background" : ""}`}>
                 <header className="header">
                     <button onClick={() => setActiveSection("account")}>Account</button>
+                    {isAuthenticated && (<button className="logout-button" onClick={handleLogout}>Logout</button>)}
                 </header>
                 <nav className="navbar">
                     <button onClick={() => setActiveSection("home")}>Home</button>
