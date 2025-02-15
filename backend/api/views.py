@@ -19,6 +19,7 @@ def get_logs(request):
         {
             "event": log.event,
             "timestamp": log.timestamp.isoformat(),
+            "user_id": log.user.id if log.user else None  # Include user ID if available
         }
         for log in logs
     ]
@@ -44,9 +45,11 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
+            log_event(event=f"{user.username} logged in", user=user)  # Display username
             return JsonResponse({'success': True, 'message': 'Login successful'})
         else:
             return JsonResponse({'success': False, 'message': 'Invalid credentials'}, status=401)
+    
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 # Automatically create a test user on server startup if it doesn't exist

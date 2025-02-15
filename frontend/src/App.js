@@ -125,11 +125,11 @@ function App() {
         setActiveSection("home");
 
         // Log the authentication event.
-        try {
+        /*try {
             await logEvent("User Authenticated");
         } catch (error) {
             console.error("Failed To Log Authentication:", error);
-        }
+        }*/
     };
 
     return (
@@ -222,6 +222,7 @@ function App() {
                                         <tr key={index}>
                                             <td>{log.event}</td>
                                             <td>{log.timestamp}</td>
+                                            <td>{log.user_id !== null ? log.user_id : "N/A"}</td> {/* Display User ID */}
                                         </tr>
                                     ))}
                                 </tbody>
