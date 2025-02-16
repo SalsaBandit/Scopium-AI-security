@@ -35,7 +35,10 @@ def log_event_view(request):
     if request.method == "POST":
         data = json.loads(request.body)
         event = data.get("event", "")
-        log_event(event=event)
+        username = data.get("user", None)  # Retrieve username from request
+        user = User.objects.filter(username=username).first() if username else None  # Find user
+
+        log_event(event=event, user=user)  # Log event with user
         return JsonResponse({"status": "success", "message": "Log recorded"})
     return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
 

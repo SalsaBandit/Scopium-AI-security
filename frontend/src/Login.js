@@ -6,7 +6,6 @@ const Login = ({ onLoginSuccess }) => {
     const [message, setMessage] = useState('');
 
     const handleLogin = async () => {
-        // Send login request to the backend
         try {
             const response = await fetch('http://localhost:8000/api/login/', {
                 method: 'POST',
@@ -15,10 +14,10 @@ const Login = ({ onLoginSuccess }) => {
                 },
                 body: JSON.stringify({ username, password })
             });
-
+    
             const data = await response.json();
             if (data.success) {
-                onLoginSuccess(); // Notify App.js of successful login
+                onLoginSuccess(username); // Pass the username to App.js
             } else {
                 setMessage(data.message);
             }

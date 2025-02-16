@@ -53,7 +53,7 @@ function App() {
                 .then(response => setLogs(response.data.logs))
                 .catch(error => console.log(error));
         }
-    }, [activeSection]);
+    }, [activeSection, isAuthenticated]);
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -61,7 +61,7 @@ function App() {
                 .then(response => setRecentLogs(response.data.logs))
                 .catch(error => console.log(error));
         }
-    }, [activeSection]);
+    }, [activeSection, isAuthenticated]);
 
     // Fetch log data for User Activity Monitor widget.
     const aggregateLogsByDate = (logs) => {
@@ -77,9 +77,15 @@ function App() {
       };
 
       // Function to log out the user
-    const handleLogout = () => {
+      const handleLogout = async () => {
+        const username = localStorage.getItem("username"); // Retrieve stored username
+        if (username) {
+            await logEvent(`${username} logged out`); // Log the logout event
+        }
+    
+        localStorage.removeItem("username"); // Clear stored username
         setIsAuthenticated(false);
-        setActiveSection("login"); // Redirect user to login after logout
+        setActiveSection("login"); // Redirect to login page
     };
       
       // Render chart data.
@@ -110,12 +116,13 @@ function App() {
 
     // Function which calls the backend to create a log.
     const logEvent = async (event) => {
+        const user = localStorage.getItem("username"); // Retrieve stored username
         await fetch("/api/log_event/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ event }),
+            body: JSON.stringify({ event, user }),
         });
     };
 
@@ -138,16 +145,16 @@ function App() {
     );
 
     // Handle successful login.
-    const handleLoginSuccess = async () => {
+    const handleLoginSuccess = async (username) => {
+        localStorage.setItem("username", username); // Store username
         setIsAuthenticated(true);
         setActiveSection("home");
-
-        // Log the authentication event.
-        /*try {
-            await logEvent("User Authenticated");
+    
+        try {
+            await logEvent(`${username} logged in`); // Log the login event
         } catch (error) {
-            console.error("Failed To Log Authentication:", error);
-        }*/
+            console.error("Failed to log login event:", error);
+        }
     };
 
     return (
