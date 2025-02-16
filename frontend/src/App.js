@@ -30,6 +30,7 @@ function App() {
     const [activeSection, setActiveSection] = useState("home"); // State to manage displayed content section.
     const [isAuthenticated, setIsAuthenticated] = useState(false); // Track login status
     const [logs, setLogs] = useState([]); // Stores log data.
+    const [recentLogs, setRecentLogs] = useState([]); // Store only 10 recent logs
     const [chartData, setChartData] = useState(null);
     const [searchTerm, setSearchTerm] = useState(""); // Search term for filtering logs.
     const [sortField, setSortField] = useState("timestamp"); // Field to sort by.
@@ -50,6 +51,14 @@ function App() {
         if (isAuthenticated) {
             axios.get('/api/get_logs/')
                 .then(response => setLogs(response.data.logs))
+                .catch(error => console.log(error));
+        }
+    }, [activeSection]);
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            axios.get('/api/get_recent_logs/')
+                .then(response => setRecentLogs(response.data.logs))
                 .catch(error => console.log(error));
         }
     }, [activeSection]);
@@ -174,8 +183,24 @@ function App() {
                             </div>
                             <div className="section recent-logs">
                                 <h2>Recent Logs</h2>
-                                <p>A list view of recent logs (date, user, action, status).</p>
-                                <p>Interacting will expand logs for full detail.</p>
+                                <table className="logs-table">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Action</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {recentLogs.map((log, index) => (
+                                            <tr key={index}>
+                                                <td>{log.username}</td>
+                                                <td>{log.event}</td>
+                                                <td>{log.timestamp}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
                             </div>
                             <div className="section user-activity-monitor">
                                 <h2>User Activity Monitor</h2><br/>

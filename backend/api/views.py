@@ -75,3 +75,15 @@ def account_page(request):
     ]
     return Response({"boxes": boxes})
 
+@api_view(['GET'])
+def get_recent_logs(request):
+    logs = EventLog.objects.select_related("user").order_by("-timestamp")[:10]
+    log_data = [
+        {
+            "username": log.user.username if log.user else "Unknown",
+            "event": log.event,
+            "timestamp": log.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        for log in logs
+    ]
+    return JsonResponse({"logs": log_data})
