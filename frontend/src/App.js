@@ -27,7 +27,7 @@ ChartJS.register(
 
 function App() {
     const [message, setMessage] = useState("");
-    const [activeSection, setActiveSection] = useState("home"); // State to manage displayed content section.
+    const [activeSection, setActiveSection] = useState("Home"); // State to manage displayed content section.
     const [isAuthenticated, setIsAuthenticated] = useState(false); // Track login status
     const [logs, setLogs] = useState([]); // Stores log data.
     const [recentLogs, setRecentLogs] = useState([]); // Store only 10 recent logs
@@ -36,6 +36,7 @@ function App() {
     const [sortField, setSortField] = useState("timestamp"); // Field to sort by.
     const [sortOrder, setSortOrder] = useState("asc"); // Sort order (asc or desc).
     const [accountBoxes, setAccountBoxes] = useState([]); // State for Account page boxes.
+    const [username, setUsername] = useState(localStorage.getItem("username") || "Unknown User");
 
     // Fetch a welcome message from the backend
     useEffect(() => {
@@ -45,6 +46,13 @@ function App() {
                 .catch(error => console.error("API Error:", error));
         }
     }, [isAuthenticated]);
+
+    useEffect(() => {
+        const storedUsername = localStorage.getItem("username");
+        if (storedUsername) {
+            setUsername(storedUsername);
+        }
+    }, []);
     
     // Fetches logs from backend after authentication.
     useEffect(() => {
@@ -76,8 +84,8 @@ function App() {
         return { dates, counts };
       };
 
-      // Function to log out the user
-      const handleLogout = async () => {
+    // Function to log out the user
+    const handleLogout = async () => {
         try {
             const response = await fetch('http://localhost:8000/api/logout/', {
                 method: 'POST',
@@ -96,7 +104,7 @@ function App() {
       
       // Render chart data.
       useEffect(() => {
-        if (activeSection === "home" && logs.length > 0) {
+        if (activeSection === "Home" && logs.length > 0) {
           const aggregated = aggregateLogsByDate(logs);
           const data = {
             labels: aggregated.dates,
@@ -120,18 +128,6 @@ function App() {
         }
     }, [activeSection]);
 
-    // Function which calls the backend to create a log.
-    const logEvent = async (event) => {
-        const user = localStorage.getItem("username"); // Retrieve stored username
-        await fetch("/api/log_event/", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ event, user }),
-        });
-    };
-
     // Function to sort logs by the selected field and order.
     const handleSort = (field) => {
         const order = sortField === field && sortOrder === "asc" ? "desc" : "asc";
@@ -152,9 +148,35 @@ function App() {
 
     // Handle successful login.
     const handleLoginSuccess = async (username) => {
-        localStorage.setItem("username", username); // Store username
+        if (!username) {
+            try {
+                const response = await fetch('/api/hello/', { credentials: 'include' });
+                const data = await response.json();
+                username = data.message.replace("Hello, ", "").replace("!", "");
+            } catch (error) {
+                console.error("Failed to fetch username:", error);
+            }
+        }
+    
+        if (username) {
+            setUsername(username);  // Store in state
+            localStorage.setItem("username", username);  // Store in localStorage
+        }
+    
         setIsAuthenticated(true);
-        setActiveSection("home");
+        setActiveSection("Home");
+    };
+
+    const handleNavigation = (section) => {
+        setActiveSection(section);
+    
+        fetch("/api/log_event/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ event: `${username} navigated to ${section}`, user: username }),
+        });
     };
 
     return (
@@ -164,19 +186,19 @@ function App() {
                 <header className="header">
                         <h1 className="header-user">{message}</h1>
                             <div className="header-buttons">
-                                <button onClick={() => setActiveSection("account")}>Account</button>
+                                <button onClick={() => handleNavigation("Account")}>Account</button>
                                 {isAuthenticated && (<button className="logout-button" onClick={handleLogout}>Logout</button>)}
                             </div>
                 </header>
                 <nav className="navbar">
-                    <button onClick={() => setActiveSection("home")}>Home</button>
-                    <button onClick={() => setActiveSection("userActivityLogs")}>User Activity Logs</button>
-                    <button onClick={() => setActiveSection("complianceReports")}>Compliance Reports</button>
-                    <button onClick={() => setActiveSection("forensicTools")}>Forensic Tools</button>
+                    <button onClick={() => handleNavigation("Home")}>Home</button>
+                    <button onClick={() => handleNavigation("User Activity Logs")}>User Activity Logs</button>
+                    <button onClick={() => handleNavigation("Compliance Reports")}>Compliance Reports</button>
+                    <button onClick={() => handleNavigation("Forensic Tools")}>Forensic Tools</button>
                 </nav>
 
                 <div className="content">
-                    {activeSection === "home" && (
+                    {activeSection === "Home" && (
                         <>
                             <div className="section recent-alerts">
                                 <h2>Recent Alerts</h2>
@@ -230,7 +252,7 @@ function App() {
                             </div>
                         </>
                     )}
-                    {activeSection === "userActivityLogs" && (
+                    {activeSection === "User Activity Logs" && (
                         <div className="section user-activity-logs">
                             <h2>User Activity Logs</h2>
                             <div className="controls">
@@ -273,19 +295,19 @@ function App() {
                             </table>
                         </div>
                     )}
-                    {activeSection === "complianceReports" && (
+                    {activeSection === "Compliance Reports" && (
                         <div className="section compliance-reports">
                             <h2>Compliance Reports</h2>
                             <p>Detailed compliance reports will be displayed here.</p>
                         </div>
                     )}
-                    {activeSection === "forensicTools" && (
+                    {activeSection === "Forensic Tools" && (
                         <div className="section forensic-tools">
                             <h2>Forensic Tools</h2>
                             <p>Tools for forensic analysis are displayed here.</p>
                         </div>
                     )}
-                    {activeSection === "account" && (
+                    {activeSection === "Account" && (
                         <div className="section account">
                             <h2>Personal Information</h2>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>

@@ -43,11 +43,18 @@ def log_event_view(request):
     if request.method == "POST":
         data = json.loads(request.body)
         event = data.get("event", "")
-        username = data.get("user", None)  # Retrieve username from request
-        user = User.objects.filter(username=username).first() if username else None  # Find user
+        username = data.get("user", None)
 
-        log_event(event=event, user=user)  # Log event with user
-        return JsonResponse({"status": "success", "message": "Log recorded"})
+        user = None
+        if request.user.is_authenticated:
+            user = request.user
+        elif username:
+            user = User.objects.filter(username=username).first()
+
+        if event:
+            log_event(event=event, user=user)
+            return JsonResponse({"status": "success", "message": "Log recorded"})
+
     return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
 
 @csrf_exempt
