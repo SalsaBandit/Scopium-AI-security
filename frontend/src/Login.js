@@ -12,12 +12,13 @@ const Login = ({ onLoginSuccess }) => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
+                credentials: 'include',  // REQUIRED to send cookies
                 body: JSON.stringify({ username, password })
             });
     
             const data = await response.json();
             if (data.success) {
-                onLoginSuccess(username); // Pass the username to App.js
+                onLoginSuccess();
             } else {
                 setMessage(data.message);
             }

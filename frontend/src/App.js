@@ -40,9 +40,9 @@ function App() {
     // Fetch a welcome message from the backend
     useEffect(() => {
         if (isAuthenticated) {
-            axios.get('/api/hello/')
+            axios.get('/api/hello/', { withCredentials: true })  // Ensure cookies are included
                 .then(response => setMessage(response.data.message))
-                .catch(error => console.error(error));
+                .catch(error => console.error("API Error:", error));
         }
     }, [isAuthenticated]);
     
@@ -78,14 +78,20 @@ function App() {
 
       // Function to log out the user
       const handleLogout = async () => {
-        const username = localStorage.getItem("username"); // Retrieve stored username
-        if (username) {
-            await logEvent(`${username} logged out`); // Log the logout event
-        }
+        try {
+            const response = await fetch('http://localhost:8000/api/logout/', {
+                method: 'POST',
+                credentials: 'include',  // Ensure session is included
+            });
     
-        localStorage.removeItem("username"); // Clear stored username
-        setIsAuthenticated(false);
-        setActiveSection("login"); // Redirect to login page
+            const data = await response.json();
+            if (data.success) {
+                setIsAuthenticated(false);
+                setActiveSection("login");
+            }
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
     };
       
       // Render chart data.
@@ -149,12 +155,6 @@ function App() {
         localStorage.setItem("username", username); // Store username
         setIsAuthenticated(true);
         setActiveSection("home");
-    
-        try {
-            await logEvent(`${username} logged in`); // Log the login event
-        } catch (error) {
-            console.error("Failed to log login event:", error);
-        }
     };
 
     return (

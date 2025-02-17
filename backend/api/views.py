@@ -11,10 +11,18 @@ import json
 @api_view(['GET'])
 def hello_world(request):
     user = request.user
+    session_user_id = request.session.get('_auth_user_id')
+
     if user.is_authenticated:
         return Response({"message": f"Hello, {user.username}!"})
+    elif session_user_id:
+        try:
+            user_obj = User.objects.get(id=session_user_id)
+            return Response({"message": f"Hello, {user_obj.username}!"})
+        except User.DoesNotExist:
+            return Response({"message": "Hello, Guest! (Session User ID exists but not found)"})
     else:
-        return Response({"message": "Hello, Guest!"})
+        return Response({"message": f"Hello, Guest! (Session Data: {request.session.items()})"})
 
 # API endpoint to retrieve all event logs in JSON format.
 def get_logs(request):
@@ -48,16 +56,35 @@ def login_view(request):
         data = json.loads(request.body)
         username = data.get('username')
         password = data.get('password')
-        
+
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            log_event(event=f"{user.username} logged in", user=user)  # Display username
+
+            # Ensure session is properly stored before logging event
+            request.session['user_id'] = user.id
+            request.session.modified = True
+            request.session.save()
+
+            # Log the event only once, ensuring the user is attached
+            log_event(event=f"{user.username} logged in", user=user)
+
             return JsonResponse({'success': True, 'message': 'Login successful'})
         else:
             return JsonResponse({'success': False, 'message': 'Invalid credentials'}, status=401)
-    
+
     return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+@csrf_exempt
+def logout_view(request):
+    if request.user.is_authenticated:
+        log_event(event=f"{request.user.username} logged out", user=request.user)
+
+    # Perform logout and clear session
+    from django.contrib.auth import logout
+    logout(request)
+
+    return JsonResponse({'success': True, 'message': 'Logout successful'})
 
 # Automatically create a test user on server startup if it doesn't exist
 # Remove before production
