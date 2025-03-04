@@ -40,6 +40,9 @@ function App() {
     const [email, setEmail] = useState(""); // Store user email
     const [accountCreated, setAccountCreated] = useState(""); // Store account creation date
     const [lastLogin, setLastLogin] = useState(""); // Store last login time
+    const [fullName, setFullName] = useState("");
+    const [phoneNumber, setPhoneNumber] = useState("");
+    const [userRole, setUserRole] = useState("");
 
     // Fetch a welcome message from the backend
     useEffect(() => {
@@ -141,6 +144,15 @@ function App() {
                     }
                     if (response.data.last_login) {
                         setLastLogin(response.data.last_login);  // Store last login time
+                    }
+                    if (response.data.full_name) {
+                        setFullName(response.data.full_name);  // Store full name
+                    }
+                    if (response.data.phone_number) {
+                        setPhoneNumber(response.data.phone_number);  // Store phone number
+                    }
+                    if (response.data.role) {
+                        setUserRole(response.data.role);  // Store user role
                     }
                 })
                 .catch(error => console.error('Error fetching account data:', error));
@@ -366,7 +378,7 @@ function App() {
                                         boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
                                     }}>
                                         <h2>Name</h2>
-                                        <p>Name</p>
+                                        <p>{fullName}</p>
                                     </div>
 
                                     <div className="section username-information" style={{
@@ -399,7 +411,7 @@ function App() {
                                         boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
                                     }}>
                                         <h2>Phone Number</h2>
-                                        <p>Phone Number</p>
+                                        <p>{phoneNumber || "N/A"}</p>
                                     </div>
                                 </div>
                             </div>
@@ -445,7 +457,7 @@ function App() {
                                         boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
                                     }}>
                                         <h2>User Role</h2>
-                                        <p>User Role</p>
+                                        <p>{userRole || "N/A"}</p>
                                     </div>
 
                                     <div className="section account-information" style={{

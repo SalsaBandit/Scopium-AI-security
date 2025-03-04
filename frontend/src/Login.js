@@ -18,7 +18,19 @@ const Login = ({ onLoginSuccess }) => {
     
             const data = await response.json();
             if (data.success) {
-                onLoginSuccess();
+                // Fetch additional user details (role, access level)
+                const userDetailsResponse = await fetch(`http://localhost:8000/api/user_details/${username}/`);
+                const userDetails = await userDetailsResponse.json();
+
+                if (userDetails.success) {
+                    localStorage.setItem("username", username);
+                    localStorage.setItem("role", userDetails.role);
+                    localStorage.setItem("access_level", userDetails.access_level);
+
+                    onLoginSuccess(username, userDetails.role, userDetails.access_level);
+                } else {
+                    setMessage("Failed to retrieve user details.");
+                }
             } else {
                 setMessage(data.message);
             }
@@ -32,7 +44,6 @@ const Login = ({ onLoginSuccess }) => {
         <div className="login-overlay">
             <div className="login-popup">
                 <h2>Login</h2><br/>
-                <p>[DEBUG] Use 'test' for USER & PASS</p><br/>
                 <div>
                     <input 
                         type="text"
