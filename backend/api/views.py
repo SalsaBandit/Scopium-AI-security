@@ -103,14 +103,23 @@ create_test_user()
 
 @api_view(['GET'])
 def account_page(request):
-    # Example data for the "Account" page
+    user = request.user
+    if not user.is_authenticated:
+        return Response({"error": "User not authenticated"}, status=401)
+
     boxes = [
         {"title": "Recent Alerts", "content": "A list view with color-coded severity levels (critical, high, moderate)."},
         {"title": "Data Transfer Monitor", "content": "A bar chart showing transfer volumes over time."},
-        {"title": "Recent Logs", "content": "A list view of recent logs with details."},
         {"title": "User Activity Monitor", "content": "A line graph showing user activity over time."},
     ]
-    return Response({"boxes": boxes})
+
+    return Response({
+        "boxes": boxes,
+        "username": user.username,  # Sends logged-in username
+        "email": user.email,  # Sends logged-in email
+        "account_created": user.date_joined.strftime("%Y-%m-%d %H:%M:%S"),  # Format: YYYY-MM-DD HH:MM:SS
+        "last_login": user.last_login.strftime("%Y-%m-%d %H:%M:%S") if user.last_login else "Never logged in"
+    })
 
 @api_view(['GET'])
 def get_recent_logs(request):

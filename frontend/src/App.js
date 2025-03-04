@@ -37,6 +37,9 @@ function App() {
     const [sortOrder, setSortOrder] = useState("asc"); // Sort order (asc or desc).
     const [accountBoxes, setAccountBoxes] = useState([]); // State for Account page boxes.
     const [username, setUsername] = useState(localStorage.getItem("username") || "Unknown User");
+    const [email, setEmail] = useState(""); // Store user email
+    const [accountCreated, setAccountCreated] = useState(""); // Store account creation date
+    const [lastLogin, setLastLogin] = useState(""); // Store last login time
 
     // Fetch a welcome message from the backend
     useEffect(() => {
@@ -121,9 +124,25 @@ function App() {
 
     // Fetch Account page data.
     useEffect(() => {
-        if (activeSection === "account") {
+        if (activeSection === "Account") {
             axios.get('/api/account/')
-                .then(response => setAccountBoxes(response.data.boxes))
+                .then(response => {
+                    if (response.data.boxes) {
+                        setAccountBoxes(response.data.boxes);
+                    }
+                    if (response.data.username) {
+                        setUsername(response.data.username);
+                    }
+                    if (response.data.email) {
+                        setEmail(response.data.email);
+                    }
+                    if (response.data.account_created) {
+                        setAccountCreated(response.data.account_created);
+                    }
+                    if (response.data.last_login) {
+                        setLastLogin(response.data.last_login);  // Store last login time
+                    }
+                })
                 .catch(error => console.error('Error fetching account data:', error));
         }
     }, [activeSection]);
@@ -358,7 +377,7 @@ function App() {
                                         boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
                                     }}>
                                         <h2>Username</h2>
-                                        <p>Username</p>
+                                        <p>{username}</p>
                                     </div>
 
                                     <div className="section email-information" style={{
@@ -368,8 +387,8 @@ function App() {
                                         backgroundColor: '#fff',
                                         boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
                                     }}>
-                                        <h2>Recent Logs</h2>
-                                        <p>Email</p>
+                                        <h2>Email</h2>
+                                        <p>{email}</p>
                                     </div>
 
                                     <div className="section number-information" style={{
@@ -386,7 +405,7 @@ function App() {
                             </div>
                         </div>
                     )}
-                    {activeSection === "account" && (
+                    {activeSection === "Account" && (
                         <div className="section account">
                             <h2>Additional Information</h2>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
@@ -437,7 +456,7 @@ function App() {
                                         boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
                                     }}>
                                         <h2>Account Created</h2>
-                                        <p>Account Created</p>
+                                        <p>{accountCreated}</p>
                                     </div>
 
                                     <div className="section login-information" style={{
@@ -448,7 +467,7 @@ function App() {
                                         boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
                                     }}>
                                         <h2>Last Login</h2>
-                                        <p>Last Login</p>
+                                        <p>{lastLogin}</p>
                                     </div>
 
                                     <div className="section password-information" style={{
