@@ -328,12 +328,8 @@ function App() {
                             </table>
                         </div>
                     )}
-                    {activeSection === "Compliance Reports" && (
-                        <div className="section compliance-reports">
-                            <h2>Compliance Reports</h2>
-                            <p>Detailed compliance reports will be displayed here.</p>
-                        </div>
-                    )}
+                  {activeSection === "Compliance Reports" && <ComplianceReports />}
+
                     {activeSection === "Forensic Tools" && (
                         <div className="section forensic-tools">
                             <h2>Forensic Tools</h2>
