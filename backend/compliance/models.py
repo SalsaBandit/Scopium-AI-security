@@ -7,9 +7,11 @@ class ComplianceReport(models.Model):
         choices=[("Passed", "Passed"), ("Pending", "Pending"), ("Failed", "Failed")]
     )
     date = models.DateField()
+    document = models.FileField(upload_to='compliance_documents/', blank=True, null=True)
 
     def __str__(self):
         return self.title
+
 
 class ComplianceViolation(models.Model):
     report = models.ForeignKey(ComplianceReport, on_delete=models.CASCADE)
