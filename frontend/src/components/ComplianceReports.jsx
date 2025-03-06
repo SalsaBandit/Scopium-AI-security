@@ -38,15 +38,22 @@ export default function ComplianceReports() {
                                 <td className="border p-2">{report.title}</td>
                                 <td className="border p-2">{report.status}</td>
                                 <td className="border p-2">{report.date}</td>
-                                <td className="border p-2">
-                                    {report.document ? (
-                                        <a href={`http://127.0.0.1:8000${report.document}`} target="_blank" rel="noopener noreferrer">
-                                            View Document
-                                        </a>
-                                    ) : (
-                                        "No document"
-                                    )}
-                                </td>
+                               <td className="border p-2">
+    {report.document ? (
+        report.document.startsWith("http") ? (
+            <a href={report.document} target="_blank" rel="noopener noreferrer">
+                View Document
+            </a>
+        ) : (
+            <a href={`http://127.0.0.1:8000${report.document}`} target="_blank" rel="noopener noreferrer">
+                View Document
+            </a>
+        )
+    ) : (
+        "No document"
+    )}
+</td>
+
                             </tr>
                         ))}
                     </tbody>
