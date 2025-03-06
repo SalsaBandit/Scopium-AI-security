@@ -26,3 +26,13 @@ def get_compliance_violations(request):
     serializer = ComplianceViolationSerializer(violations, many=True)
     return Response(serializer.data)
 
+@api_view(['POST'])
+def add_test_compliance_report(request):
+    ComplianceReport.objects.create(
+        title="HIPAA Compliance Audit",
+        status="Passed",
+        date="2025-03-06"
+    )
+    return Response({"message": "Test report added!"})
+
+
