@@ -5,7 +5,7 @@ from .models import ComplianceReport, ComplianceViolation
 class ComplianceReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = ComplianceReport
-        fields = '__all__'
+        fields = ['id', 'title', 'status', 'date', 'document']
 
 class ComplianceViolationSerializer(serializers.ModelSerializer):
     class Meta:
