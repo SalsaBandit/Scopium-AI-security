@@ -5,11 +5,20 @@ from .serializers import ComplianceReportSerializer
 from .models import ComplianceReport, ComplianceViolation
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def get_compliance_reports(request):
-    reports = ComplianceReport.objects.all()
-    serializer = ComplianceReportSerializer(reports, many=True)
-    return Response(serializer.data)
+    if request.method == 'GET':
+        reports = ComplianceReport.objects.all()
+        serializer = ComplianceReportSerializer(reports, many=True)
+        return Response(serializer.data)
+    
+    elif request.method == 'POST':
+        serializer = ComplianceReportSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+
 
 @api_view(['GET'])
 def get_compliance_violations(request):
