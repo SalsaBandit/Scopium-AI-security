@@ -45,6 +45,7 @@ function App() {
     const [fullName, setFullName] = useState("");
     const [phoneNumber, setPhoneNumber] = useState("");
     const [userRole, setUserRole] = useState("");
+    const [visibleWidgets, setVisibleWidgets] = useState({alerts: true, transfers: true, logs: true, activity: true });
 
     // Fetch a welcome message from the backend.
     useEffect(() => {
@@ -200,6 +201,14 @@ function App() {
         setActiveSection("Home");
     };
 
+    // Toggles widget on dashboard Home.
+    const toggleWidget = (key) => {
+        setVisibleWidgets((prev) => ({
+            ...prev,
+            [key]: !prev[key],
+        }));
+    };
+
     const handleNavigation = (section) => {
         setActiveSection(section);
     
@@ -233,56 +242,82 @@ function App() {
                 <div className="content">
                     {activeSection === "Home" && (
                         <>
-                            <div className="section recent-alerts">
-                                <h2>Recent Alerts</h2>
-                                <p>A list view with color-coded severity levels (critical, high, moderate).</p>
-                                <p>Mark as reviewed, etc.</p>
+                            <div className="home-toggle-bar">
+                                <button onClick={() => toggleWidget('alerts')}>
+                                    {visibleWidgets.alerts ? 'Hide' : 'Show'} Alerts
+                                </button>
+                                <button onClick={() => toggleWidget('transfers')}>
+                                    {visibleWidgets.transfers ? 'Hide' : 'Show'} Data Transfers
+                                </button>
+                                <button onClick={() => toggleWidget('logs')}>
+                                    {visibleWidgets.logs ? 'Hide' : 'Show'} Logs
+                                </button>
+                                <button onClick={() => toggleWidget('activity')}>
+                                    {visibleWidgets.activity ? 'Hide' : 'Show'} Activity Monitor
+                                </button>
                             </div>
-                            <div className="section data-transfer-monitor">
-                                <h2>Data Transfer Monitor</h2>
-                                <p>A bar chart showing transfer volumes over time.</p>
-                                <p>Selecting a bar drills down into detailed analysis (user, destination, data type).</p>
-                            </div>
-                            <div className="section recent-logs">
-                                <h2>Recent Logs</h2>
-                                <table className="logs-table">
-                                    <thead>
-                                        <tr>
-                                            <th>User</th>
-                                            <th>Action</th>
-                                            <th>Date</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {recentLogs.map((log, index) => (
-                                            <tr key={index}>
-                                                <td>{log.username}</td>
-                                                <td>{log.event}</td>
-                                                <td>{log.timestamp}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div className="section user-activity-monitor">
-                                <h2>User Activity Monitor</h2><br/>
-                                <div style={{ width: '100%', height: '80%' }}>
-                                    {chartData ? (
-                                        <Line
-                                        data={chartData}
-                                        options={{
-                                            responsive: true,
-                                            maintainAspectRatio: false,
-                                            plugins: {
-                                            legend: { position: 'left' },
-                                            },
-                                        }}
-                                        />
-                                    ) : (
-                                        <p>Loading chart...</p>
-                                    )}
+
+                            {visibleWidgets.alerts && (
+                                <div className="section recent-alerts">
+                                    <h2>Recent Alerts</h2>
+                                    <p>A list view with color-coded severity levels (critical, high, moderate).</p>
+                                    <p>Mark as reviewed, etc.</p>
                                 </div>
-                            </div>
+                            )}
+
+                            {visibleWidgets.transfers && (
+                                <div className="section data-transfer-monitor">
+                                    <h2>Data Transfer Monitor</h2>
+                                    <p>A bar chart showing transfer volumes over time.</p>
+                                    <p>Selecting a bar drills down into detailed analysis (user, destination, data type).</p>
+                                </div>
+                            )}
+
+                            {visibleWidgets.logs && (
+                                <div className="section recent-logs">
+                                    <h2>Recent Logs</h2>
+                                    <table className="logs-table">
+                                        <thead>
+                                            <tr>
+                                                <th>User</th>
+                                                <th>Action</th>
+                                                <th>Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {recentLogs.map((log, index) => (
+                                                <tr key={index}>
+                                                    <td>{log.username}</td>
+                                                    <td>{log.event}</td>
+                                                    <td>{log.timestamp}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+
+                            {visibleWidgets.activity && (
+                                <div className="section user-activity-monitor">
+                                    <h2>User Activity Monitor</h2><br />
+                                    <div style={{ width: '100%', height: '80%' }}>
+                                        {chartData ? (
+                                            <Line
+                                                data={chartData}
+                                                options={{
+                                                    responsive: true,
+                                                    maintainAspectRatio: false,
+                                                    plugins: {
+                                                        legend: { position: 'left' },
+                                                    },
+                                                }}
+                                            />
+                                        ) : (
+                                            <p>Loading chart...</p>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </>
                     )} {/*End Home section.*/}
 

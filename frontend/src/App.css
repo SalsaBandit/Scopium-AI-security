@@ -95,6 +95,43 @@ body {
     box-shadow: 0px 0px 16px rgba(0, 0, 0, 1);
 }
 
+/* CSS Styling for Home toggle widget bar. */
+.home-toggle-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-around;
+    background-color: #333;
+    padding: 5px 5px;
+    width: 100%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+    .home-toggle-bar button {
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 1rem;
+        cursor: pointer;
+        font-family: inherit;
+        padding: 10px;
+        transition: color 0.3s;
+    }
+
+        .home-toggle-bar button:hover {
+            color: #ffb74d;
+        }
+
+        .home-toggle-bar button:focus {
+            outline: 2px solid #ffb74d;
+        }
+    
+.home-content-wrapper {
+    padding-top: 120px;
+}
+
 /* CSS Styling for Log Section. */
 .log-section-container {
     display: flex;
@@ -102,17 +139,17 @@ body {
     gap: 2rem;
 }
 
-.log-list {
-    flex: 1;
-}
+    .log-list {
+        flex: 1;
+    }
 
-.log-exporting {
-    width: 250px;
-    padding: 1rem;
-    border-left: 1px solid #ccc;
-    background-color: #f9f9f9;
-    height: fit-content;
-}
+    .log-exporting {
+        width: 250px;
+        padding: 1rem;
+        border-left: 1px solid #ccc;
+        background-color: #f9f9f9;
+        height: fit-content;
+    }
 
 /* CSS Styling for User Activity Logs widgets. */
 .user-activity-logs {
