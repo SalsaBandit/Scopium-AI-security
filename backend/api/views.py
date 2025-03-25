@@ -1,11 +1,12 @@
 from .models import EventLog, UserProfile
 from .logging import log_event
-from django.http import JsonResponse
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
-from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
+from django.http import JsonResponse
+from django.utils import timezone
+from django.utils.timezone import now
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import json
@@ -117,7 +118,37 @@ def create_test_user():
         }
     )
 
-create_test_user()
+    if not profile_created and not profile.password_last_changed:
+        profile.password_last_changed = now()  # Set password last changed if missing
+        profile.save()
+
+def create_admin_user():
+    user, created = User.objects.get_or_create(
+        username='tester',
+        defaults={
+            'email': 'tester@example.com',
+            'password': make_password('tester')
+        }
+    )
+
+    profile, profile_created = UserProfile.objects.get_or_create(
+        user=user,
+        defaults={
+            "full_name": "Test Two",
+            "phone_number": "555-222-3333",
+            "role": "admin",
+            "access_level": 5
+        }
+    )
+
+    if not profile.password_last_changed:
+        profile.password_last_changed = now()
+        profile.save()
+
+    print("Admin user created:", "Created" if created else "Already exists")
+
+#create_test_user()
+create_admin_user()
 
 @api_view(['GET'])
 def account_page(request):
@@ -126,6 +157,19 @@ def account_page(request):
         return Response({"error": "User not authenticated"}, status=401)
 
     profile = getattr(user, "profile", None)  # Retrieve UserProfile safely
+
+     # Get the most recent password change event for the user
+    password_change_event = (
+        EventLog.objects.filter(user=user, event__icontains="password changed")
+        .order_by("-timestamp")
+        .first()
+    )
+
+    password_last_changed = (
+        password_change_event.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+        if password_change_event
+        else user.date_joined.strftime("%Y-%m-%d %H:%M:%S")
+    )
 
     boxes = [
         {"title": "Recent Alerts", "content": "A list view with color-coded severity levels (critical, high, moderate)."},
@@ -142,6 +186,7 @@ def account_page(request):
         "full_name": profile.full_name if profile else "N/A",  # Retrieve full name from UserProfile
         "phone_number": profile.phone_number if profile else "N/A",  # Retrieve phone number
         "role": profile.role if profile and profile.role else "N/A",  # Retrieve user role
+        "password_last_changed": password_last_changed, # Retrieve password last changed date
     })
 
 @api_view(['GET'])
@@ -160,7 +205,16 @@ def get_recent_logs(request):
 @csrf_exempt
 def register_user(request):
     if request.method == "POST":
+        if not request.user.is_authenticated:
+            return JsonResponse({"success": False, "message": "Authentication required"}, status=401)
+
         try:
+            creator = request.user
+            creator_profile = UserProfile.objects.get(user=creator)
+
+            if creator_profile.role != "admin" or creator_profile.access_level < 5:
+                return JsonResponse({"success": False, "message": "Permission denied"}, status=403)
+
             data = json.loads(request.body)
             username = data.get("username")
             password = data.get("password")
@@ -176,6 +230,8 @@ def register_user(request):
             user = User.objects.create(username=username, email=email, password=make_password(password))
             UserProfile.objects.create(user=user, full_name=full_name, phone_number=phone_number, role=role, access_level=access_level)
 
+            log_event(event=f"User {creator.username} created user {username} (ID: {user.id})", user=creator)
+
             return JsonResponse({"success": True, "message": "User registered successfully"})
         except Exception as e:
             return JsonResponse({"success": False, "message": str(e)}, status=500)
@@ -185,19 +241,16 @@ def register_user(request):
 def get_user_details(request, username):
     try:
         user = User.objects.get(username=username)
-
-        # Ensure profile exists
-        profile, created = UserProfile.objects.get_or_create(user=user, defaults={
-            'full_name': user.username,  # Default name if missing
-            'role': 'user',
-            'access_level': 1
-        })
+        profile = user.profile  # Access UserProfile through related field
 
         return JsonResponse({
             "success": True,
             "username": user.username,
             "role": profile.role,
-            "access_level": profile.access_level
+            "access_level": profile.access_level,
+            "phone_number": profile.phone_number if profile.phone_number else "N/A",
+            "full_name": profile.full_name if profile.full_name else "N/A",
+            "password_last_changed": profile.password_last_changed.strftime("%Y-%m-%d %H:%M:%S") if profile.password_last_changed else "Unknown"
         })
     except User.DoesNotExist:
         return JsonResponse({"success": False, "message": "User not found"}, status=404)

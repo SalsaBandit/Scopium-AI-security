@@ -16,6 +16,7 @@ class UserProfile(models.Model):
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     role = models.CharField(max_length=50, choices=[("admin", "Admin"), ("user", "User")], default="user")
     access_level = models.IntegerField(default=1)
+    password_last_changed = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.full_name} ({self.user.username}) - {self.role}"

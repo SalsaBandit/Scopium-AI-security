@@ -27,6 +27,25 @@ ChartJS.register(
     Legend
   );
 
+  const inputStyle = {
+    padding: '10px',
+    borderRadius: '5px',
+    border: '1px solid #ccc',
+    fontSize: '1em',
+    fontFamily: 'inherit'
+};
+
+const buttonStyle = {
+    padding: '10px',
+    backgroundColor: '#4caf50',
+    color: 'white',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontSize: '1em',
+    fontFamily: 'inherit'
+};
+
 function App() {
     const [message, setMessage] = useState("");
     const [activeSection, setActiveSection] = useState("Home"); // State to manage displayed content section.
@@ -46,6 +65,8 @@ function App() {
     const [phoneNumber, setPhoneNumber] = useState("");
     const [userRole, setUserRole] = useState("");
     const [visibleWidgets, setVisibleWidgets] = useState({alerts: true, transfers: true, logs: true, activity: true });
+    const [passwordLastChanged, setPasswordLastChanged] = useState(""); // Password change date
+    const [accessLevel, setAccessLevel] = useState(parseInt(localStorage.getItem("access_level")) || 1);
 
     // Fetch a welcome message from the backend.
     useEffect(() => {
@@ -157,6 +178,9 @@ function App() {
                     if (response.data.role) {
                         setUserRole(response.data.role);  // Store user role.
                     }
+                    if (response.data.password_last_changed) {
+                        setPasswordLastChanged(response.data.password_last_changed);
+                    }
                 })
                 .catch(error => console.error('Error fetching account data:', error));
         }
@@ -193,8 +217,15 @@ function App() {
         }
     
         if (username) {
-            setUsername(username);  // Store in state.
-            localStorage.setItem("username", username);  // Store in localStorage.
+            setUsername(username);
+            localStorage.setItem("username", username);
+    
+            // Pull from localStorage after Login.js sets it
+            const role = localStorage.getItem("role");
+            const level = parseInt(localStorage.getItem("access_level"));
+    
+            setUserRole(role);
+            setAccessLevel(level);
         }
     
         setIsAuthenticated(true);
@@ -452,10 +483,60 @@ function App() {
                                         </div>
                                         <div className="section password-information" style={cardStyle}>
                                             <h2>Password Last Changed</h2>
-                                            <p>{"N/A"}</p>
+                                            <p>{passwordLastChanged}</p>
                                         </div>
                                     </div>
                                 </div>
+                                {userRole === "admin" && accessLevel === 5 && (
+                                    <div className="section" style={{
+                                        border: '1px solid #4caf50',
+                                        borderRadius: '8px',
+                                        padding: '20px',
+                                        backgroundColor: '#f9fff9',
+                                        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+                                        maxWidth: '600px'
+                                    }}>
+                                        <h2>Add New User</h2>
+                                        <form onSubmit={async (e) => {
+                                            e.preventDefault();
+                                            const username = e.target.username.value;
+                                            const password = e.target.password.value;
+                                            const email = e.target.email.value;
+                                            const full_name = e.target.full_name.value;
+                                            const phone_number = e.target.phone_number.value;
+                                            const role = e.target.role.value;
+                                            const access_level = parseInt(e.target.access_level.value);
+
+                                            try {
+                                                const response = await fetch("/api/register/", {
+                                                    method: "POST",
+                                                    headers: { "Content-Type": "application/json" },
+                                                    credentials: "include",
+                                                    body: JSON.stringify({ username, password, email, full_name, phone_number, role, access_level })
+                                                });
+
+                                                const result = await response.json();
+                                                alert(result.message);
+                                                e.target.reset();
+                                            } catch (err) {
+                                                alert("Error: Could not register user.");
+                                                console.error(err);
+                                            }
+                                        }} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                            <input type="text" name="username" placeholder="Username" required style={inputStyle} />
+                                            <input type="password" name="password" placeholder="Password" required style={inputStyle} />
+                                            <input type="text" name="full_name" placeholder="Full Name" style={inputStyle} />
+                                            <input type="text" name="email" placeholder="Email" style={inputStyle} />
+                                            <input type="text" name="phone_number" placeholder="Phone Number" style={inputStyle} />
+                                            <select name="role" defaultValue="user" style={inputStyle}>
+                                                <option value="user">User</option>
+                                                <option value="admin">Admin</option>
+                                            </select>
+                                            <input type="number" name="access_level" placeholder="Access Level" defaultValue="1" min="1" style={inputStyle} />
+                                            <button type="submit" style={buttonStyle}>Create User</button>
+                                        </form>
+                                    </div>
+                                )}
                             </>
                         );
                     })()} {/*End account section.*/}
