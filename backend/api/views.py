@@ -148,7 +148,7 @@ def create_admin_user():
     print("Admin user created:", "Created" if created else "Already exists")
 
 #create_test_user()
-create_admin_user()
+#create_admin_user()
 
 @api_view(['GET'])
 def account_page(request):
@@ -254,3 +254,46 @@ def get_user_details(request, username):
         })
     except User.DoesNotExist:
         return JsonResponse({"success": False, "message": "User not found"}, status=404)
+    
+@csrf_exempt
+@api_view(['DELETE'])
+def delete_user(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"success": False, "message": "Authentication required"}, status=401)
+
+    try:
+        admin_user = request.user
+        admin_profile = UserProfile.objects.get(user=admin_user)
+
+        if admin_profile.role != "admin" or admin_profile.access_level < 5:
+            return JsonResponse({"success": False, "message": "Permission denied"}, status=403)
+
+        data = json.loads(request.body)
+        username_to_delete = data.get("username")
+
+        if username_to_delete == admin_user.username:
+            return JsonResponse({"success": False, "message": "Admins cannot delete themselves"}, status=400)
+
+        user_to_delete = User.objects.get(username=username_to_delete)
+        user_to_delete.delete()
+
+        log_event(event=f"Admin {admin_user.username} deleted user {username_to_delete}", user=admin_user)
+
+        return JsonResponse({"success": True, "message": f"User {username_to_delete} deleted successfully"})
+
+    except User.DoesNotExist:
+        return JsonResponse({"success": False, "message": "User not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
+    
+@api_view(['GET'])
+def list_users(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"success": False, "message": "Authentication required"}, status=401)
+
+    profile = getattr(request.user, "profile", None)
+    if not profile or profile.role != "admin" or profile.access_level < 5:
+        return JsonResponse({"success": False, "message": "Permission denied"}, status=403)
+
+    users = User.objects.all().values_list("username", flat=True)
+    return JsonResponse({"success": True, "users": list(users)})

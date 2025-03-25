@@ -11,4 +11,6 @@ urlpatterns = [
     path("api/get_recent_logs/", views.get_recent_logs, name="get_recent_logs"),
     path('api/account/', views.account_page, name='account_page'),
     path('api/logout/', views.logout_view, name='logout'),
+    path('api/delete_user/', views.delete_user, name='delete_user'),
+    path('api/list_users/', views.list_users, name='list_users'),
 ]

@@ -56,7 +56,7 @@ function App() {
     const [searchTerm, setSearchTerm] = useState(""); // Search term for filtering logs.
     const [sortField, setSortField] = useState("timestamp"); // Field to sort by.
     const [sortOrder, setSortOrder] = useState("asc"); // Sort order (asc or desc).
-    const [accountBoxes, setAccountBoxes] = useState([]); // State for Account page boxes.
+    //const [accountBoxes, setAccountBoxes] = useState([]); // State for Account page boxes.
     const [username, setUsername] = useState(localStorage.getItem("username") || "Unknown User");
     const [email, setEmail] = useState(""); // Store user email.
     const [accountCreated, setAccountCreated] = useState(""); // Store account creation date.
@@ -67,6 +67,7 @@ function App() {
     const [visibleWidgets, setVisibleWidgets] = useState({alerts: true, transfers: true, logs: true, activity: true });
     const [passwordLastChanged, setPasswordLastChanged] = useState(""); // Password change date
     const [accessLevel, setAccessLevel] = useState(parseInt(localStorage.getItem("access_level")) || 1);
+    const [allUsers, setAllUsers] = useState([]);
 
     // Fetch a welcome message from the backend.
     useEffect(() => {
@@ -100,6 +101,13 @@ function App() {
                 .catch(error => console.log(error));
         }
     }, [activeSection, isAuthenticated]);
+
+    useEffect(() => {
+        const storedUsername = localStorage.getItem("username");
+        if (storedUsername) {
+            setUsername(storedUsername);
+        }
+    }, []);
 
     // Fetch log data for User Activity Monitor widget.
     const aggregateLogsByDate = (logs) => {
@@ -154,9 +162,9 @@ function App() {
         if (activeSection === "Account") {
             axios.get('/api/account/')
                 .then(response => {
-                    if (response.data.boxes) {
+                    /*if (response.data.boxes) {
                         setAccountBoxes(response.data.boxes);
-                    }
+                    }*/
                     if (response.data.username) {
                         setUsername(response.data.username);
                     }
@@ -181,10 +189,35 @@ function App() {
                     if (response.data.password_last_changed) {
                         setPasswordLastChanged(response.data.password_last_changed);
                     }
+                    if (response.data.access_level !== undefined) {
+                        setAccessLevel(response.data.access_level);
+                    }
+                    /*const isAdmin = response.data.role === "admin" && response.data.access_level === 5;
+                    console.log("isAdmin:", isAdmin, "| role:", response.data.role, "| access_level:", response.data.access_level);
+                    if (isAdmin) {
+                        fetch("/api/list_users/", { credentials: "include" })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) setAllUsers(data.users);
+                            })
+                            .catch(err => console.error("Error fetching users:", err));
+                    }*/
                 })
                 .catch(error => console.error('Error fetching account data:', error));
         }
     }, [activeSection]);
+
+    useEffect(() => {
+        if (userRole === "admin" && accessLevel === 5 && isAuthenticated) {
+            fetch("/api/list_users/", { credentials: "include" })
+                .then(res => res.json())
+                .then(data => {
+                    console.log("Fetched users (fallback useEffect):", data);
+                    if (data.success) setAllUsers(data.users);
+                })
+                .catch(err => console.error("Error fetching users (fallback):", err));
+        }
+    }, [userRole, accessLevel, isAuthenticated]);
 
     // Function to sort logs by the selected field and order.
     const handleSort = (field) => {
@@ -487,15 +520,25 @@ function App() {
                                         </div>
                                     </div>
                                 </div>
+                                {/* Create User Form & Delete User Form */}
                                 {userRole === "admin" && accessLevel === 5 && (
-                                    <div className="section" style={{
+                                    <div style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'stretch',
+                                        gap: '20px',
+                                        maxWidth: '600px',
+                                        width: '100%',
+                                    }}>
+                                        {/* Create User Form */}
+                                        <div className="section" style={{
                                         border: '1px solid #4caf50',
                                         borderRadius: '8px',
                                         padding: '20px',
                                         backgroundColor: '#f9fff9',
                                         boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-                                        maxWidth: '600px'
-                                    }}>
+                                        width: '100%'
+                                        }}>
                                         <h2>Add New User</h2>
                                         <form onSubmit={async (e) => {
                                             e.preventDefault();
@@ -508,19 +551,19 @@ function App() {
                                             const access_level = parseInt(e.target.access_level.value);
 
                                             try {
-                                                const response = await fetch("/api/register/", {
-                                                    method: "POST",
-                                                    headers: { "Content-Type": "application/json" },
-                                                    credentials: "include",
-                                                    body: JSON.stringify({ username, password, email, full_name, phone_number, role, access_level })
-                                                });
+                                            const response = await fetch("/api/register/", {
+                                                method: "POST",
+                                                headers: { "Content-Type": "application/json" },
+                                                credentials: "include",
+                                                body: JSON.stringify({ username, password, email, full_name, phone_number, role, access_level })
+                                            });
 
-                                                const result = await response.json();
-                                                alert(result.message);
-                                                e.target.reset();
+                                            const result = await response.json();
+                                            alert(result.message);
+                                            e.target.reset();
                                             } catch (err) {
-                                                alert("Error: Could not register user.");
-                                                console.error(err);
+                                            alert("Error: Could not register user.");
+                                            console.error(err);
                                             }
                                         }} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                             <input type="text" name="username" placeholder="Username" required style={inputStyle} />
@@ -529,14 +572,65 @@ function App() {
                                             <input type="text" name="email" placeholder="Email" style={inputStyle} />
                                             <input type="text" name="phone_number" placeholder="Phone Number" style={inputStyle} />
                                             <select name="role" defaultValue="user" style={inputStyle}>
-                                                <option value="user">User</option>
-                                                <option value="admin">Admin</option>
+                                            <option value="user">User</option>
+                                            <option value="admin">Admin</option>
                                             </select>
                                             <input type="number" name="access_level" placeholder="Access Level" defaultValue="1" min="1" style={inputStyle} />
                                             <button type="submit" style={buttonStyle}>Create User</button>
                                         </form>
+                                        </div>
+
+                                        {/* Delete User Form */}
+                                        <div className="section" style={{
+                                        border: '1px solid #f44336',
+                                        borderRadius: '8px',
+                                        padding: '20px',
+                                        backgroundColor: '#fff8f8',
+                                        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+                                        width: '100%'
+                                        }}>
+                                        <h2>Delete User</h2>
+                                        <form onSubmit={async (e) => {
+                                            e.preventDefault();
+                                            const usernameToDelete = e.target.username.value;
+
+                                            if (!window.confirm(`Are you sure you want to delete user "${usernameToDelete}"?`)) return;
+
+                                            try {
+                                            const response = await fetch("/api/delete_user/", {
+                                                method: "DELETE",
+                                                headers: { "Content-Type": "application/json" },
+                                                credentials: "include",
+                                                body: JSON.stringify({ username: usernameToDelete })
+                                            });
+
+                                            const result = await response.json();
+                                            alert(result.message);
+                                            e.target.reset();
+
+                                            // 🔄 Refresh the user list dropdown
+                                            const refreshed = await fetch("/api/list_users/", { credentials: "include" });
+                                            const data = await refreshed.json();
+                                            if (data.success) setAllUsers(data.users);
+
+                                            } catch (err) {
+                                            alert("Error: Could not delete user.");
+                                            console.error(err);
+                                            }
+                                        }} style={{ display: 'flex', flexDirection: 'column', gap: '12px', margin: 0, padding: 0 }}>
+                                            <select name="username" required style={inputStyle}>
+                                            <option value="">Select user to delete</option>
+                                            {allUsers
+                                                .filter(u => u && u !== username) // prevent excluding empty/null usernames
+                                                .map((u, idx) => (
+                                                <option key={idx} value={u}>{u}</option>
+                                                ))}
+                                            </select>
+                                            <button type="submit" style={{ ...buttonStyle, backgroundColor: '#f44336' }}>Delete User</button>
+                                        </form>
+                                        </div>
                                     </div>
-                                )}
+                                    )}
                             </>
                         );
                     })()} {/*End account section.*/}
