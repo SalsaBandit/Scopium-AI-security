@@ -1,3 +1,5 @@
+'''run below command to install scapy library before first run'''
+'''pip install scapy'''
 from scapy.all import sniff
 import time
 

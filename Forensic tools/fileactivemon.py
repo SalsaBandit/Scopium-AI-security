@@ -1,5 +1,7 @@
 import os
 import time
+'''run below command to install watchdog library before first run'''
+'''pip install watchdog'''
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
