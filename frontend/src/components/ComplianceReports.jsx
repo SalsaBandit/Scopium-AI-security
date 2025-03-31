@@ -180,61 +180,52 @@ export default function ComplianceReports() {
           <p>Loading reports...</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-gray-300 text-sm">
-              <thead>
-                <tr className="bg-gray-200">
-                  <th className="border p-2">Title</th>
-                  <th className="border p-2">Status</th>
-                  <th className="border p-2">Date</th>
-                  <th className="border p-2">HIPAA Document</th>
-                  <th className="border p-2">Type</th>
-                  <th className="border p-2">Submitted By</th>
-                  <th className="border p-2">Reviewed By</th>
-                  <th className="border p-2">Risk Level</th>
-                  <th className="border p-2">Audit Type</th>
-                  <th className="border p-2">Tags</th>
+            <table className="min-w-full table-fixed border border-gray-300 divide-y divide-gray-200 text-sm">
+              <thead className="bg-gray-200 text-left font-semibold text-gray-700">
+                <tr>
+                  <th className="p-3">Title</th>
+                  <th className="p-3">Status</th>
+                  <th className="p-3">Date</th>
+                  <th className="p-3">HIPAA Document</th>
+                  <th className="p-3">Type</th>
+                  <th className="p-3">Submitted By</th>
+                  <th className="p-3">Reviewed By</th>
+                  <th className="p-3">Risk Level</th>
+                  <th className="p-3">Audit Type</th>
+                  <th className="p-3">Tags</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-gray-200">
                 {reports.map((report) => (
-                  <tr key={report.id} className="border">
-                    <td className="border p-2">{report.title}</td>
-                    <td className="border p-2">{report.status}</td>
-                    <td className="border p-2">{report.date}</td>
-                    <td className="border p-2">
+                  <tr key={report.id}>
+                    <td className="p-3">{report.title}</td>
+                    <td className="p-3">{report.status}</td>
+                    <td className="p-3">{report.date}</td>
+                    <td className="p-3">
                       {report.document ? (
-                        report.document.startsWith("http") ? (
-                          <a
-                            href={report.document}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 underline"
-                          >
-                            View Document
-                          </a>
-                        ) : (
-                          <a
-                            href={`http://127.0.0.1:8000${report.document}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 underline"
-                          >
-                            View Document
-                          </a>
-                        )
+                        <a
+                          href={
+                            report.document.startsWith("http")
+                              ? report.document
+                              : `http://127.0.0.1:8000${report.document}`
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 underline"
+                        >
+                          View Document
+                        </a>
                       ) : (
                         "No document"
                       )}
                     </td>
-                    <td className="border p-2">{report.type}</td>
-                    <td className="border p-2">{report.submittedBy}</td>
-                    <td className="border p-2">{report.reviewedBy}</td>
-                    <td className="border p-2">{report.riskLevel}</td>
-                    <td className="border p-2">{report.auditType}</td>
-                    <td className="border p-2">
-                      {report.tags && report.tags.length > 0
-                        ? report.tags.join(", ")
-                        : "—"}
+                    <td className="p-3">{report.type}</td>
+                    <td className="p-3">{report.submittedBy}</td>
+                    <td className="p-3">{report.reviewedBy}</td>
+                    <td className="p-3">{report.riskLevel}</td>
+                    <td className="p-3">{report.auditType}</td>
+                    <td className="p-3">
+                      {report.tags?.length ? report.tags.join(", ") : "—"}
                     </td>
                   </tr>
                 ))}
