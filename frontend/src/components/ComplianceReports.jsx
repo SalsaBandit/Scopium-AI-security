@@ -123,54 +123,57 @@ export default function ComplianceReports() {
 
   return (
     <div className="p-4 space-y-8">
-      {/* Summary Cards */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-        <div className="bg-white rounded-2xl shadow p-4">
-          <p className="text-gray-500 text-sm">Total Reports</p>
-          <h2 className="text-xl font-semibold">{totalReports}</h2>
+      {/* Summary + Chart Side by Side */}
+      <section className="flex flex-col lg:flex-row gap-6 mt-4">
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 flex-grow">
+          <div className="bg-white rounded-2xl shadow p-4">
+            <p className="text-gray-500 text-sm">Total Reports</p>
+            <h2 className="text-xl font-semibold">{totalReports}</h2>
+          </div>
+          <div className="bg-white rounded-2xl shadow p-4">
+            <p className="text-gray-500 text-sm">Compliant Reports</p>
+            <h2 className="text-xl font-semibold text-green-600">
+              {compliantReports}
+            </h2>
+          </div>
+          <div className="bg-white rounded-2xl shadow p-4">
+            <p className="text-gray-500 text-sm">Reports with HIPAA Docs</p>
+            <h2 className="text-xl font-semibold">{reportsWithDocs}</h2>
+          </div>
+          <div className="bg-white rounded-2xl shadow p-4">
+            <p className="text-gray-500 text-sm">Latest Report Date</p>
+            <h2 className="text-xl font-semibold">{latestReportDate}</h2>
+          </div>
         </div>
-        <div className="bg-white rounded-2xl shadow p-4">
-          <p className="text-gray-500 text-sm">Compliant Reports</p>
-          <h2 className="text-xl font-semibold text-green-600">
-            {compliantReports}
-          </h2>
-        </div>
-        <div className="bg-white rounded-2xl shadow p-4">
-          <p className="text-gray-500 text-sm">Reports with HIPAA Docs</p>
-          <h2 className="text-xl font-semibold">{reportsWithDocs}</h2>
-        </div>
-        <div className="bg-white rounded-2xl shadow p-4">
-          <p className="text-gray-500 text-sm">Latest Report Date</p>
-          <h2 className="text-xl font-semibold">{latestReportDate}</h2>
-        </div>
-      </section>
 
-      {/* Pie Chart */}
-      <section className="bg-white rounded-2xl shadow p-4 w-full max-w-xl mx-auto my-8">
-        <h3 className="text-lg font-semibold mb-4 text-center">
-          Compliance Overview
-        </h3>
-        <ResponsiveContainer width="100%" height={250}>
-          <PieChart>
-            <Pie
-              data={[
-                { name: "Compliant", value: compliantReports },
-                { name: "Non-Compliant", value: nonCompliantReports },
-              ]}
-              dataKey="value"
-              nameKey="name"
-              cx="50%"
-              cy="50%"
-              outerRadius={80}
-              label
-            >
-              <Cell fill="#10b981" />
-              <Cell fill="#ef4444" />
-            </Pie>
-            <Tooltip />
-            <Legend verticalAlign="bottom" height={36} />
-          </PieChart>
-        </ResponsiveContainer>
+        {/* Pie Chart */}
+        <div className="bg-white rounded-2xl shadow p-4 w-full lg:w-[400px]">
+          <h3 className="text-lg font-semibold mb-4 text-center">
+            Compliance Overview
+          </h3>
+          <ResponsiveContainer width="100%" height={250}>
+            <PieChart>
+              <Pie
+                data={[
+                  { name: "Compliant", value: compliantReports },
+                  { name: "Non-Compliant", value: nonCompliantReports },
+                ]}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={80}
+                label
+              >
+                <Cell fill="#10b981" />
+                <Cell fill="#ef4444" />
+              </Pie>
+              <Tooltip />
+              <Legend verticalAlign="bottom" height={36} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
       </section>
 
       {/* Reports Table */}
