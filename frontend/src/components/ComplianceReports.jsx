@@ -14,10 +14,13 @@ export default function ComplianceReports() {
 
 useEffect(() => {
   fetch("http://127.0.0.1:8000/api/compliance/reports/")
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) throw new Error("API error");
+      return response.json();
+    })
     .then((data) => {
-      if (data.length === 0) {
-        // Inject dummy reports
+      // Use dummy data if API returns empty or nothing
+      if (!Array.isArray(data) || data.length === 0) {
         data = [
           {
             id: 1,
@@ -48,10 +51,35 @@ useEffect(() => {
     })
     .catch((error) => {
       console.error("Error fetching reports:", error);
+
+      // Use dummy data on error
+      setReports([
+        {
+          id: 1,
+          title: "March HIPAA Audit",
+          status: "Compliant",
+          date: "2025-03-01",
+          document: "/documents/march_audit.pdf",
+        },
+        {
+          id: 2,
+          title: "Unauthorized Access Log",
+          status: "Non-Compliant",
+          date: "2025-03-15",
+          document: null,
+        },
+        {
+          id: 3,
+          title: "Quarterly Data Export",
+          status: "Compliant",
+          date: "2025-03-25",
+          document: "/documents/q1_export.pdf",
+        },
+      ]);
+
       setLoadingReports(false);
     });
 }, []);
-
 
   // Derived stats for dashboard cards
   const totalReports = reports.length;
