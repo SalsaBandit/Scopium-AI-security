@@ -12,22 +12,75 @@ export default function ComplianceReports() {
   const [reports, setReports] = useState([]);
   const [loadingReports, setLoadingReports] = useState(true);
 
-useEffect(() => {
-  fetch("http://127.0.0.1:8000/api/compliance/reports/")
-    .then((response) => {
-      if (!response.ok) throw new Error("API error");
-      return response.json();
-    })
-    .then((data) => {
-      // Use dummy data if API returns empty or nothing
-      if (!Array.isArray(data) || data.length === 0) {
-        data = [
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/compliance/reports/")
+      .then((response) => {
+        if (!response.ok) throw new Error("API error");
+        return response.json();
+      })
+      .then((data) => {
+        if (!Array.isArray(data) || data.length === 0) {
+          data = [
+            {
+              id: 1,
+              title: "March HIPAA Audit",
+              status: "Compliant",
+              date: "2025-03-01",
+              document: "/documents/march_audit.pdf",
+              type: "Privacy Review",
+              submittedBy: "Dr. Smith",
+              reviewedBy: "Compliance Team",
+              riskLevel: "Low",
+              auditType: "Internal",
+              tags: ["HIPAA", "Quarterly Audit"],
+            },
+            {
+              id: 2,
+              title: "Unauthorized Access Log",
+              status: "Non-Compliant",
+              date: "2025-03-15",
+              document: null,
+              type: "Security Incident",
+              submittedBy: "IT Admin",
+              reviewedBy: "Security Lead",
+              riskLevel: "High",
+              auditType: "External",
+              tags: ["Access Violation"],
+            },
+            {
+              id: 3,
+              title: "Quarterly Data Export",
+              status: "Compliant",
+              date: "2025-03-25",
+              document: "/documents/q1_export.pdf",
+              type: "Data Handling",
+              submittedBy: "Records Manager",
+              reviewedBy: "Compliance Team",
+              riskLevel: "Medium",
+              auditType: "Internal",
+              tags: ["PHI", "Export"],
+            },
+          ];
+        }
+
+        setReports(data);
+        setLoadingReports(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching reports:", error);
+        setReports([
           {
             id: 1,
             title: "March HIPAA Audit",
             status: "Compliant",
             date: "2025-03-01",
             document: "/documents/march_audit.pdf",
+            type: "Privacy Review",
+            submittedBy: "Dr. Smith",
+            reviewedBy: "Compliance Team",
+            riskLevel: "Low",
+            auditType: "Internal",
+            tags: ["HIPAA", "Quarterly Audit"],
           },
           {
             id: 2,
@@ -35,6 +88,12 @@ useEffect(() => {
             status: "Non-Compliant",
             date: "2025-03-15",
             document: null,
+            type: "Security Incident",
+            submittedBy: "IT Admin",
+            reviewedBy: "Security Lead",
+            riskLevel: "High",
+            auditType: "External",
+            tags: ["Access Violation"],
           },
           {
             id: 3,
@@ -42,46 +101,18 @@ useEffect(() => {
             status: "Compliant",
             date: "2025-03-25",
             document: "/documents/q1_export.pdf",
+            type: "Data Handling",
+            submittedBy: "Records Manager",
+            reviewedBy: "Compliance Team",
+            riskLevel: "Medium",
+            auditType: "Internal",
+            tags: ["PHI", "Export"],
           },
-        ];
-      }
+        ]);
+        setLoadingReports(false);
+      });
+  }, []);
 
-      setReports(data);
-      setLoadingReports(false);
-    })
-    .catch((error) => {
-      console.error("Error fetching reports:", error);
-
-      // Use dummy data on error
-      setReports([
-        {
-          id: 1,
-          title: "March HIPAA Audit",
-          status: "Compliant",
-          date: "2025-03-01",
-          document: "/documents/march_audit.pdf",
-        },
-        {
-          id: 2,
-          title: "Unauthorized Access Log",
-          status: "Non-Compliant",
-          date: "2025-03-15",
-          document: null,
-        },
-        {
-          id: 3,
-          title: "Quarterly Data Export",
-          status: "Compliant",
-          date: "2025-03-25",
-          document: "/documents/q1_export.pdf",
-        },
-      ]);
-
-      setLoadingReports(false);
-    });
-}, []);
-
-  // Derived stats for dashboard cards
   const totalReports = reports.length;
   const nonCompliantReports = reports.filter(
     (r) => r.status && r.status.toLowerCase().includes("non")
@@ -114,7 +145,7 @@ useEffect(() => {
         </div>
       </section>
 
-      {/* Pie Chart: Compliant vs Non-Compliant */}
+      {/* Pie Chart */}
       <section className="bg-white rounded-2xl shadow p-4 w-full max-w-xl mx-auto my-8">
         <h3 className="text-lg font-semibold mb-4 text-center">
           Compliance Overview
@@ -144,56 +175,72 @@ useEffect(() => {
 
       {/* Reports Table */}
       <section>
-        <h2 className="text-xl font-bold">Compliance Reports</h2>
+        <h2 className="text-xl font-bold mb-4">Compliance Reports</h2>
         {loadingReports ? (
           <p>Loading reports...</p>
-        ) : reports.length > 0 ? (
-          <table className="w-full border-collapse border border-gray-300 mt-4">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="border p-2">Title</th>
-                <th className="border p-2">Status</th>
-                <th className="border p-2">Date</th>
-                <th className="border p-2">HIPAA Document</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reports.map((report) => (
-                <tr key={report.id} className="border">
-                  <td className="border p-2">{report.title}</td>
-                  <td className="border p-2">{report.status}</td>
-                  <td className="border p-2">{report.date}</td>
-                  <td className="border p-2">
-                    {report.document ? (
-                      report.document.startsWith("http") ? (
-                        <a
-                          href={report.document}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 underline"
-                        >
-                          View Document
-                        </a>
-                      ) : (
-                        <a
-                          href={`http://127.0.0.1:8000${report.document}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 underline"
-                        >
-                          View Document
-                        </a>
-                      )
-                    ) : (
-                      "No document"
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         ) : (
-          <p>No reports available.</p>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse border border-gray-300 text-sm">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="border p-2">Title</th>
+                  <th className="border p-2">Status</th>
+                  <th className="border p-2">Date</th>
+                  <th className="border p-2">HIPAA Document</th>
+                  <th className="border p-2">Type</th>
+                  <th className="border p-2">Submitted By</th>
+                  <th className="border p-2">Reviewed By</th>
+                  <th className="border p-2">Risk Level</th>
+                  <th className="border p-2">Audit Type</th>
+                  <th className="border p-2">Tags</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reports.map((report) => (
+                  <tr key={report.id} className="border">
+                    <td className="border p-2">{report.title}</td>
+                    <td className="border p-2">{report.status}</td>
+                    <td className="border p-2">{report.date}</td>
+                    <td className="border p-2">
+                      {report.document ? (
+                        report.document.startsWith("http") ? (
+                          <a
+                            href={report.document}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 underline"
+                          >
+                            View Document
+                          </a>
+                        ) : (
+                          <a
+                            href={`http://127.0.0.1:8000${report.document}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 underline"
+                          >
+                            View Document
+                          </a>
+                        )
+                      ) : (
+                        "No document"
+                      )}
+                    </td>
+                    <td className="border p-2">{report.type}</td>
+                    <td className="border p-2">{report.submittedBy}</td>
+                    <td className="border p-2">{report.reviewedBy}</td>
+                    <td className="border p-2">{report.riskLevel}</td>
+                    <td className="border p-2">{report.auditType}</td>
+                    <td className="border p-2">
+                      {report.tags && report.tags.length > 0
+                        ? report.tags.join(", ")
+                        : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
     </div>
