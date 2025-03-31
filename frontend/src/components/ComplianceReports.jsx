@@ -37,7 +37,7 @@ export default function ComplianceReports() {
   return (
     <div className="p-4 space-y-8">
       {/* Summary Cards */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
         <div className="bg-white rounded-2xl shadow p-4">
           <p className="text-gray-500 text-sm">Total Reports</p>
           <h2 className="text-xl font-semibold">{totalReports}</h2>
@@ -59,7 +59,7 @@ export default function ComplianceReports() {
       </section>
 
       {/* Pie Chart: Compliant vs Non-Compliant */}
-      <section className="bg-white rounded-2xl shadow p-4 w-full max-w-xl mx-auto">
+      <section className="bg-white rounded-2xl shadow p-4 w-full max-w-xl mx-auto my-8">
         <h3 className="text-lg font-semibold mb-4 text-center">
           Compliance Overview
         </h3>
@@ -77,8 +77,8 @@ export default function ComplianceReports() {
               outerRadius={80}
               label
             >
-              <Cell fill="#10b981" /> {/* Tailwind green-500 */}
-              <Cell fill="#ef4444" /> {/* Tailwind red-500 */}
+              <Cell fill="#10b981" />
+              <Cell fill="#ef4444" />
             </Pie>
             <Tooltip />
             <Legend verticalAlign="bottom" height={36} />
