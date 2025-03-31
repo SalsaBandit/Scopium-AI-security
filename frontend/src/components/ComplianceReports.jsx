@@ -124,9 +124,9 @@ export default function ComplianceReports() {
   return (
     <div className="p-4 space-y-8">
       {/* Summary + Chart Side by Side */}
-      <section className="flex flex-col lg:flex-row gap-6 mt-4">
+      <section className="flex flex-col lg:flex-row justify-between gap-6 mt-4">
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 flex-grow">
+        <div className="grid grid-cols-2 gap-4 flex-grow max-w-[60%]">
           <div className="bg-white rounded-2xl shadow p-4">
             <p className="text-gray-500 text-sm">Total Reports</p>
             <h2 className="text-xl font-semibold">{totalReports}</h2>
@@ -147,8 +147,8 @@ export default function ComplianceReports() {
           </div>
         </div>
 
-        {/* Pie Chart */}
-        <div className="bg-white rounded-2xl shadow p-4 w-full lg:w-[400px]">
+        {/* Pie Chart to the right */}
+        <div className="bg-white rounded-2xl shadow p-4 w-full lg:w-[400px] self-start">
           <h3 className="text-lg font-semibold mb-4 text-center">
             Compliance Overview
           </h3>
