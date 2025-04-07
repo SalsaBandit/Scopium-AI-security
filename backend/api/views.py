@@ -10,6 +10,23 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import json
+from .models import ComplianceReport  # make sure this is at the top
+from .serializers import ComplianceReportSerializer
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import parser_classes, permission_classes
+
+@api_view(['POST'])
+@parser_classes([MultiPartParser, FormParser])
+@permission_classes([IsAuthenticated])
+def submit_compliance_report(request):
+    serializer = ComplianceReportSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save(user=request.user)
+        return Response({"message": "Compliance report submitted successfully."}, status=201)
+    return Response(serializer.errors, status=400)
+
+
 
 @api_view(['GET'])
 def hello_world(request):
