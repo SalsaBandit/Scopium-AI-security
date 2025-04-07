@@ -123,33 +123,33 @@ export default function ComplianceReports() {
   const latestReportDate = reports.length > 0 ? reports[0].date : "N/A";
 
   return (
-    <div className="p-4 space-y-8">
-      {/* Summary + Chart Side by Side */}
-      <section className="flex flex-col lg:flex-row justify-between gap-6 mt-4">
+    <div className="p-6 max-w-screen-xl mx-auto space-y-12">
+      {/* Top Summary + Pie Chart Section */}
+      <section className="flex flex-col lg:flex-row justify-between gap-10">
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 gap-4 flex-grow max-w-[60%]">
-          <div className="bg-white rounded-2xl shadow p-4">
+        <div className="grid grid-cols-2 md:grid-cols-2 gap-6 flex-grow">
+          <div className="bg-white rounded-2xl shadow p-6">
             <p className="text-gray-500 text-sm">Total Reports</p>
-            <h2 className="text-xl font-semibold">{totalReports}</h2>
+            <h2 className="text-2xl font-bold">{totalReports}</h2>
           </div>
-          <div className="bg-white rounded-2xl shadow p-4">
+          <div className="bg-white rounded-2xl shadow p-6">
             <p className="text-gray-500 text-sm">Compliant Reports</p>
-            <h2 className="text-xl font-semibold text-green-600">
+            <h2 className="text-2xl font-bold text-green-600">
               {compliantReports}
             </h2>
           </div>
-          <div className="bg-white rounded-2xl shadow p-4">
+          <div className="bg-white rounded-2xl shadow p-6">
             <p className="text-gray-500 text-sm">Reports with HIPAA Docs</p>
-            <h2 className="text-xl font-semibold">{reportsWithDocs}</h2>
+            <h2 className="text-2xl font-bold">{reportsWithDocs}</h2>
           </div>
-          <div className="bg-white rounded-2xl shadow p-4">
+          <div className="bg-white rounded-2xl shadow p-6">
             <p className="text-gray-500 text-sm">Latest Report Date</p>
-            <h2 className="text-xl font-semibold">{latestReportDate}</h2>
+            <h2 className="text-2xl font-bold">{latestReportDate}</h2>
           </div>
         </div>
 
-        {/* Pie Chart to the right */}
-        <div className="bg-white rounded-2xl shadow p-4 w-full lg:w-[400px] self-start">
+        {/* Pie Chart */}
+        <div className="bg-white rounded-2xl shadow p-6 w-full lg:w-[400px]">
           <h3 className="text-lg font-semibold mb-4 text-center">
             Compliance Overview
           </h3>
@@ -177,41 +177,41 @@ export default function ComplianceReports() {
         </div>
       </section>
 
-      {/* ✅ Upload Form Section */}
-      <div className="bg-white p-4 rounded-2xl shadow mb-8">
-        <h2 className="text-xl font-bold mb-4">Submit a New Compliance Report</h2>
+      {/* Upload Form */}
+      <section className="bg-white p-6 rounded-2xl shadow">
+        <h2 className="text-2xl font-bold mb-4">Submit a New Compliance Report</h2>
         <SubmitReport />
-      </div>
+      </section>
 
-      {/* Reports Table */}
+      {/* Table Section */}
       <section>
-        <h2 className="text-xl font-bold mb-4">Compliance Reports</h2>
+        <h2 className="text-2xl font-bold mb-4">Compliance Reports</h2>
         {loadingReports ? (
           <p>Loading reports...</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full table-fixed border border-gray-300 divide-y divide-gray-200 text-sm">
-              <thead className="bg-gray-200 text-left font-semibold text-gray-700">
+          <div className="overflow-x-auto bg-white rounded-2xl shadow">
+            <table className="min-w-full table-fixed border border-gray-200 divide-y divide-gray-100 text-sm">
+              <thead className="bg-gray-100 text-left font-semibold text-gray-700">
                 <tr>
-                  <th className="p-3">Title</th>
-                  <th className="p-3">Status</th>
-                  <th className="p-3">Date</th>
-                  <th className="p-3">HIPAA Document</th>
-                  <th className="p-3">Type</th>
-                  <th className="p-3">Submitted By</th>
-                  <th className="p-3">Reviewed By</th>
-                  <th className="p-3">Risk Level</th>
-                  <th className="p-3">Audit Type</th>
-                  <th className="p-3">Tags</th>
+                  <th className="p-4">Title</th>
+                  <th className="p-4">Status</th>
+                  <th className="p-4">Date</th>
+                  <th className="p-4">HIPAA Document</th>
+                  <th className="p-4">Type</th>
+                  <th className="p-4">Submitted By</th>
+                  <th className="p-4">Reviewed By</th>
+                  <th className="p-4">Risk Level</th>
+                  <th className="p-4">Audit Type</th>
+                  <th className="p-4">Tags</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-100">
                 {reports.map((report) => (
                   <tr key={report.id}>
-                    <td className="p-3">{report.title}</td>
-                    <td className="p-3">{report.status}</td>
-                    <td className="p-3">{report.date}</td>
-                    <td className="p-3">
+                    <td className="p-4">{report.title}</td>
+                    <td className="p-4">{report.status}</td>
+                    <td className="p-4">{report.date}</td>
+                    <td className="p-4">
                       {report.document ? (
                         <a
                           href={
@@ -229,12 +229,12 @@ export default function ComplianceReports() {
                         "No document"
                       )}
                     </td>
-                    <td className="p-3">{report.type}</td>
-                    <td className="p-3">{report.submittedBy}</td>
-                    <td className="p-3">{report.reviewedBy}</td>
-                    <td className="p-3">{report.riskLevel}</td>
-                    <td className="p-3">{report.auditType}</td>
-                    <td className="p-3">
+                    <td className="p-4">{report.type}</td>
+                    <td className="p-4">{report.submittedBy}</td>
+                    <td className="p-4">{report.reviewedBy}</td>
+                    <td className="p-4">{report.riskLevel}</td>
+                    <td className="p-4">{report.auditType}</td>
+                    <td className="p-4">
                       {report.tags?.length ? report.tags.join(", ") : "—"}
                     </td>
                   </tr>
