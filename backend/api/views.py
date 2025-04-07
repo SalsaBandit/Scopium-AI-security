@@ -314,3 +314,26 @@ def list_users(request):
 
     users = User.objects.all().values_list("username", flat=True)
     return JsonResponse({"success": True, "users": list(users)})
+
+from django.http import FileResponse
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def download_compliance_document(request, report_id):
+    try:
+        report = ComplianceReport.objects.get(id=report_id)
+
+        # Only allow admins or the user who submitted the report
+        if not request.user.is_staff and request.user != report.user:
+            return Response({"error": "Unauthorized"}, status=403)
+
+        if not report.document:
+            return Response({"error": "No document found"}, status=404)
+
+        file_handle = report.document.open()
+        response = FileResponse(file_handle, content_type='application/octet-stream')
+        response['Content-Disposition'] = f'attachment; filename="{report.document.name.split("/")[-1]}"'
+        return response
+
+    except ComplianceReport.DoesNotExist:
+        return Response({"error": "Report not found"}, status=404)
