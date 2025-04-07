@@ -7,6 +7,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import SubmitReport from "../components/SubmitReport"; // ✅ Import the upload form
 
 export default function ComplianceReports() {
   const [reports, setReports] = useState([]);
@@ -175,6 +176,12 @@ export default function ComplianceReports() {
           </ResponsiveContainer>
         </div>
       </section>
+
+      {/* ✅ Upload Form Section */}
+      <div className="bg-white p-4 rounded-2xl shadow mb-8">
+        <h2 className="text-xl font-bold mb-4">Submit a New Compliance Report</h2>
+        <SubmitReport />
+      </div>
 
       {/* Reports Table */}
       <section>
