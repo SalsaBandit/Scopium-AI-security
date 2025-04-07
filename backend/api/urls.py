@@ -13,4 +13,5 @@ urlpatterns = [
     path('api/logout/', views.logout_view, name='logout'),
     path('api/delete_user/', views.delete_user, name='delete_user'),
     path('api/list_users/', views.list_users, name='list_users'),
+    path('api/reports/submit/', views.submit_compliance_report, name='submit_compliance_report'),  # ✅ Add this line
 ]
