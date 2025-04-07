@@ -20,3 +20,21 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"{self.full_name} ({self.user.username}) - {self.role}"
+
+
+class ComplianceReport(models.Model):
+    REPORT_CATEGORIES = [
+        ('HIPAA', 'HIPAA'),
+        ('Security', 'Security'),
+        ('Other', 'Other'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    report_date = models.DateField()
+    category = models.CharField(max_length=100, choices=REPORT_CATEGORIES)
+    document = models.FileField(upload_to='documents/', null=True, blank=True)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Report by {self.user.username} on {self.report_date} - {self.category}"
+
