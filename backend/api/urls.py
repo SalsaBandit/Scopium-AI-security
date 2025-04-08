@@ -15,5 +15,5 @@ urlpatterns = [
     path('api/list_users/', views.list_users, name='list_users'),
     path('api/reports/submit/', views.submit_compliance_report, name='submit_compliance_report'),  
     path('api/reports/<int:report_id>/download/', views.download_compliance_document, name='download_compliance_document'),
-
+    path('api/change_password/', views.change_password, name='change_password'),
 ]

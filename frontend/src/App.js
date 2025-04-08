@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Line } from 'react-chartjs-2';
@@ -69,6 +68,7 @@ function App() {
     const [passwordLastChanged, setPasswordLastChanged] = useState(""); // Password change date
     const [accessLevel, setAccessLevel] = useState(parseInt(localStorage.getItem("access_level")) || 1);
     const [allUsers, setAllUsers] = useState([]);
+    const [passwordChangeError, setPasswordChangeError] = useState("");
 
     // Fetch a welcome message from the backend.
     useEffect(() => {
@@ -498,6 +498,46 @@ function App() {
                                             <h2>Phone Number</h2>
                                             <p>{phoneNumber || "N/A"}</p>
                                         </div>
+                                    </div>
+                                    {/* Change Password Section */}
+                                    <div className="section account" style={{ maxWidth: '100%', marginTop: '10px' }}>
+                                        <h2>Change Password</h2>
+                                        <form
+                                            onSubmit={async (e) => {
+                                                e.preventDefault();
+                                                const new_password = e.target.new_password.value;
+                                                const confirm_password = e.target.confirm_password.value;
+
+                                                if (new_password !== confirm_password) {
+                                                    setPasswordChangeError("Passwords do not match");
+                                                    return;
+                                                }
+
+                                                setPasswordChangeError("");
+
+                                                const response = await fetch("http://localhost:8000/api/change_password/", {
+                                                    method: "POST",
+                                                    headers: { "Content-Type": "application/json" },
+                                                    credentials: "include",
+                                                    body: JSON.stringify({ new_password, confirm_password }),
+                                                });
+
+                                                const result = await response.json();
+                                                alert(result?.message || "Password update attempt failed.");
+                                                if (result.success) {
+                                                    e.target.reset();
+                                                    setActiveSection("Account");
+                                                }
+                                            }}
+                                            style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '100%' }}
+                                        >
+                                            <input type="password" name="new_password" placeholder="New Password" required style={inputStyle} />
+                                            <input type="password" name="confirm_password" placeholder="Confirm Password" required style={inputStyle} />
+                                            <button type="submit" style={buttonStyle}>Change Password</button>
+                                            {passwordChangeError && (
+                                                <p style={{ color: 'red', fontSize: '0.9em' }}>{passwordChangeError}</p>
+                                            )}
+                                        </form>
                                     </div>
                                 </div>
                                 {/*Right-hand side information box.*/}

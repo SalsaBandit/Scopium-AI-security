@@ -175,16 +175,9 @@ def account_page(request):
 
     profile = getattr(user, "profile", None)  # Retrieve UserProfile safely
 
-     # Get the most recent password change event for the user
-    password_change_event = (
-        EventLog.objects.filter(user=user, event__icontains="password changed")
-        .order_by("-timestamp")
-        .first()
-    )
-
     password_last_changed = (
-        password_change_event.timestamp.strftime("%Y-%m-%d %H:%M:%S")
-        if password_change_event
+        profile.password_last_changed.strftime("%Y-%m-%d %H:%M:%S")
+        if profile and profile.password_last_changed
         else user.date_joined.strftime("%Y-%m-%d %H:%M:%S")
     )
 
@@ -337,3 +330,38 @@ def download_compliance_document(request, report_id):
 
     except ComplianceReport.DoesNotExist:
         return Response({"error": "Report not found"}, status=404)
+
+@csrf_exempt
+def change_password(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Invalid request method"}, status=405)
+
+    user = request.user
+    from django.contrib.auth.hashers import check_password
+    if not user.is_authenticated:
+        return JsonResponse({"success": False, "message": "User not authenticated"}, status=401)
+
+    try:
+        data = json.loads(request.body)
+        new_password = data.get("new_password")
+        confirm_password = data.get("confirm_password")
+
+        if new_password != confirm_password:
+            return JsonResponse({"success": False, "message": "Passwords do not match"}, status=400)
+        if not new_password:
+            return JsonResponse({"success": False, "message": "Password cannot be empty"}, status=400)
+        if check_password(new_password, user.password):
+            return JsonResponse({"success": False, "message": "New password must be different from the current password."}, status=400)
+
+        user.set_password(new_password)
+        user.save()
+
+        profile = getattr(user, "profile", None)
+        if profile:
+            profile.password_last_changed = timezone.now()
+            profile.save()
+
+        log_event(event=f"{user.username} changed their password", user=user)
+        return JsonResponse({"success": True, "message": "Password updated successfully"})
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
