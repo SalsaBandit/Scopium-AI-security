@@ -648,7 +648,7 @@ function App() {
 
                                             try {
                                             const response = await fetch("/api/delete_user/", {
-                                                method: "DELETE",
+                                                method: "POST",
                                                 headers: { "Content-Type": "application/json" },
                                                 credentials: "include",
                                                 body: JSON.stringify({ username: usernameToDelete })

@@ -13,9 +13,10 @@ import json
 import random
 from .models import ComplianceReport  # make sure this is at the top
 from .serializers import ComplianceReportSerializer
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import parser_classes, permission_classes
+from rest_framework.decorators import api_view, authentication_classes, parser_classes, permission_classes
 
 @api_view(['POST'])
 @parser_classes([MultiPartParser, FormParser])
@@ -280,15 +281,21 @@ def get_user_details(request, username):
         })
     except User.DoesNotExist:
         return JsonResponse({"success": False, "message": "User not found"}, status=404)
-    
-@csrf_exempt
-@api_view(['DELETE'])
-def delete_user(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({"success": False, "message": "Authentication required"}, status=401)
 
+@csrf_exempt
+@api_view(['POST'])
+@authentication_classes([])  # disable DRF auth classes that enforce CSRF
+@permission_classes([])      # disable permission classes
+def delete_user(request):
     try:
-        admin_user = request.user
+        from django.contrib.auth.models import User
+        from .models import UserProfile
+
+        session_user_id = request.session.get('_auth_user_id')
+        if not session_user_id:
+            return JsonResponse({"success": False, "message": "Authentication required"}, status=401)
+
+        admin_user = User.objects.get(id=session_user_id)
         admin_profile = UserProfile.objects.get(user=admin_user)
 
         if admin_profile.role != "admin" or admin_profile.access_level < 5:
