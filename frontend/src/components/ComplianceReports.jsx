@@ -211,4 +211,6 @@ export default function ComplianceReports() {
       </div>
     </div>
   );
+}
+
 
