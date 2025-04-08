@@ -11,9 +11,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import json
 import random
-from .models import ComplianceReport  # make sure this is at the top
+from .models import ComplianceReport, UserProfile
 from .serializers import ComplianceReportSerializer
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, authentication_classes, parser_classes, permission_classes
@@ -48,12 +47,21 @@ def hello_world(request):
 
 # API endpoint to retrieve all event logs in JSON format.
 def get_logs(request):
-    logs = EventLog.objects.all().order_by("-timestamp")
+    user = request.user
+    profile = getattr(user, "profile", None)
+
+    if profile and profile.role == "admin" and profile.access_level == 5:
+        # Admin sees all logs
+        logs = EventLog.objects.all().order_by("-timestamp")
+    else:
+        # Regular users see only their own logs
+        logs = EventLog.objects.filter(user=user).order_by("-timestamp")
+
     log_data = [
         {
             "event": log.event,
             "timestamp": log.timestamp.isoformat(),
-            "profile_id": log.user.profile.profile_id if log.user and hasattr(log.user, "profile") else None
+            "user_id": log.user.id if log.user else None
         }
         for log in logs
     ]
@@ -204,7 +212,14 @@ def account_page(request):
 
 @api_view(['GET'])
 def get_recent_logs(request):
-    logs = EventLog.objects.select_related("user").order_by("-timestamp")[:10]
+    user = request.user
+    profile = getattr(user, "profile", None)
+
+    if profile and profile.role == "admin" and profile.access_level == 5:
+        logs = EventLog.objects.select_related("user").order_by("-timestamp")[:10]
+    else:
+        logs = EventLog.objects.select_related("user").filter(user=user).order_by("-timestamp")[:10]
+
     log_data = [
         {
             "username": log.user.username if log.user else "Unknown",
