@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import json
+import random
 from .models import ComplianceReport  # make sure this is at the top
 from .serializers import ComplianceReportSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -51,7 +52,7 @@ def get_logs(request):
         {
             "event": log.event,
             "timestamp": log.timestamp.isoformat(),
-            "user_id": log.user.id if log.user else None  # Include user ID if available
+            "profile_id": log.user.profile.profile_id if log.user and hasattr(log.user, "profile") else None
         }
         for log in logs
     ]
@@ -197,6 +198,7 @@ def account_page(request):
         "phone_number": profile.phone_number if profile else "N/A",  # Retrieve phone number
         "role": profile.role if profile and profile.role else "N/A",  # Retrieve user role
         "password_last_changed": password_last_changed, # Retrieve password last changed date
+        "profile_id": profile.profile_id if profile else None, # Retrieve user ID
     })
 
 @api_view(['GET'])
@@ -211,6 +213,12 @@ def get_recent_logs(request):
         for log in logs
     ]
     return JsonResponse({"logs": log_data})
+
+def generate_unique_profile_id():
+    while True:
+        new_id = random.randint(100000, 999999)
+        if not UserProfile.objects.filter(profile_id=new_id).exists():
+            return new_id
 
 @csrf_exempt
 def register_user(request):
@@ -238,9 +246,16 @@ def register_user(request):
                 return JsonResponse({"success": False, "message": "Username already exists"}, status=400)
 
             user = User.objects.create(username=username, email=email, password=make_password(password))
-            UserProfile.objects.create(user=user, full_name=full_name, phone_number=phone_number, role=role, access_level=access_level)
+            UserProfile.objects.create(
+                user=user,
+                full_name=full_name,
+                phone_number=phone_number,
+                role=role,
+                access_level=access_level,
+                profile_id=generate_unique_profile_id()
+            )
 
-            log_event(event=f"User {creator.username} created user {username} (ID: {user.id})", user=creator)
+            log_event(event=f"User {creator.username} created user {username} (ID: {user.profile.profile_id})", user=creator)
 
             return JsonResponse({"success": True, "message": "User registered successfully"})
         except Exception as e:
@@ -260,7 +275,8 @@ def get_user_details(request, username):
             "access_level": profile.access_level,
             "phone_number": profile.phone_number if profile.phone_number else "N/A",
             "full_name": profile.full_name if profile.full_name else "N/A",
-            "password_last_changed": profile.password_last_changed.strftime("%Y-%m-%d %H:%M:%S") if profile.password_last_changed else "Unknown"
+            "password_last_changed": profile.password_last_changed.strftime("%Y-%m-%d %H:%M:%S") if profile.password_last_changed else "Unknown",
+            "profile_id": profile.profile_id if profile.profile_id else "N/A"
         })
     except User.DoesNotExist:
         return JsonResponse({"success": False, "message": "User not found"}, status=404)

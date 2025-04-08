@@ -69,6 +69,7 @@ function App() {
     const [accessLevel, setAccessLevel] = useState(parseInt(localStorage.getItem("access_level")) || 1);
     const [allUsers, setAllUsers] = useState([]);
     const [passwordChangeError, setPasswordChangeError] = useState("");
+    const [profileId, setProfileId] = useState("");
 
     // Fetch a welcome message from the backend.
     useEffect(() => {
@@ -192,6 +193,9 @@ function App() {
                     }
                     if (response.data.access_level !== undefined) {
                         setAccessLevel(response.data.access_level);
+                    }
+                    if (response.data.profile_id) {
+                        setProfileId(response.data.profile_id);
                     }
                     /*const isAdmin = response.data.role === "admin" && response.data.access_level === 5;
                     console.log("isAdmin:", isAdmin, "| role:", response.data.role, "| access_level:", response.data.access_level);
@@ -448,7 +452,7 @@ function App() {
                                                 <tr key={index}>
                                                     <td>{log.event}</td>
                                                     <td>{log.timestamp}</td>
-                                                    <td>{log.user_id !== null ? log.user_id : "N/A"}</td> {/* Display User ID */}
+                                                    <td>{log.profile_id !== null ? log.profile_id : "N/A"}</td> {/* Display User ID */}
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -547,6 +551,10 @@ function App() {
                                         <div className="section role-information" style={cardStyle}>
                                             <h2>User Role</h2>
                                             <p>{userRole || "N/A"}</p>
+                                        </div>
+                                        <div className="section user-id-information" style={cardStyle}>
+                                            <h2>User ID</h2>
+                                            <p>{profileId || "N/A"}</p>
                                         </div>
                                         <div className="section account-information" style={cardStyle}>
                                             <h2>Account Created</h2>
