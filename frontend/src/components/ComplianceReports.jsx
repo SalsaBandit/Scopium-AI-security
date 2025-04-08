@@ -281,7 +281,8 @@ function App() {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ event: ${username} navigated to ${section}, user: username }),
+            body: JSON.stringify({ event: `${username} navigated to ${section}`, user: username }),
+
         });
     };
 
