@@ -122,8 +122,6 @@ export default function ComplianceReports() {
   const reportsWithDocs = reports.filter((r) => r.document).length;
   const latestReportDate = reports.length > 0 ? reports[0].date : "N/A";
 
- 
-   import React from "react";
 
 export default function ComplianceReports() {
   return (
