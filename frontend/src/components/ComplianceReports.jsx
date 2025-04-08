@@ -122,128 +122,96 @@ export default function ComplianceReports() {
   const reportsWithDocs = reports.filter((r) => r.document).length;
   const latestReportDate = reports.length > 0 ? reports[0].date : "N/A";
 
+ 
+   import React from "react";
+
+export default function ComplianceReports() {
   return (
-    <div className="p-6 max-w-screen-xl mx-auto space-y-12">
-      {/* Top Summary + Pie Chart Section */}
-      <section className="flex flex-col lg:flex-row justify-between gap-10">
-        {/* Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-2 gap-6 flex-grow">
-          <div className="bg-white rounded-2xl shadow p-6">
-            <p className="text-gray-500 text-sm">Total Reports</p>
-            <h2 className="text-2xl font-bold">{totalReports}</h2>
-          </div>
-          <div className="bg-white rounded-2xl shadow p-6">
-            <p className="text-gray-500 text-sm">Compliant Reports</p>
-            <h2 className="text-2xl font-bold text-green-600">
-              {compliantReports}
-            </h2>
-          </div>
-          <div className="bg-white rounded-2xl shadow p-6">
-            <p className="text-gray-500 text-sm">Reports with HIPAA Docs</p>
-            <h2 className="text-2xl font-bold">{reportsWithDocs}</h2>
-          </div>
-          <div className="bg-white rounded-2xl shadow p-6">
-            <p className="text-gray-500 text-sm">Latest Report Date</p>
-            <h2 className="text-2xl font-bold">{latestReportDate}</h2>
-          </div>
+    <div className="p-6 bg-gray-50 min-h-screen space-y-6">
+      {/* Top Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="bg-white p-4 rounded shadow">
+          <h2 className="text-xl font-semibold">Total Reports</h2>
+          <p className="text-3xl mt-2 font-bold text-blue-600">3</p>
         </div>
-
-        {/* Pie Chart */}
-        <div className="bg-white rounded-2xl shadow p-6 w-full lg:w-[400px]">
-          <h3 className="text-lg font-semibold mb-4 text-center">
-            Compliance Overview
-          </h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie
-                data={[
-                  { name: "Compliant", value: compliantReports },
-                  { name: "Non-Compliant", value: nonCompliantReports },
-                ]}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                label
-              >
-                <Cell fill="#10b981" />
-                <Cell fill="#ef4444" />
-              </Pie>
-              <Tooltip />
-              <Legend verticalAlign="bottom" height={36} />
-            </PieChart>
-          </ResponsiveContainer>
+        <div className="bg-white p-4 rounded shadow">
+          <h2 className="text-xl font-semibold">Compliant Reports</h2>
+          <p className="text-3xl mt-2 font-bold text-green-600">2</p>
         </div>
-      </section>
+        <div className="bg-white p-4 rounded shadow">
+          <h2 className="text-xl font-semibold">HIPAA Documents</h2>
+          <p className="text-3xl mt-2 font-bold text-purple-600">2</p>
+        </div>
+      </div>
 
-      {/* Upload Form */}
-      <section className="bg-white p-6 rounded-2xl shadow">
-        <h2 className="text-2xl font-bold mb-4">Submit a New Compliance Report</h2>
-        <SubmitReport />
-      </section>
+      {/* Pie Chart Placeholder */}
+      <div className="w-full md:w-1/2 lg:w-1/3 mx-auto bg-white p-4 rounded shadow">
+        <h2 className="text-xl font-semibold mb-4">Compliance Overview</h2>
+        <div className="aspect-square border rounded-lg flex items-center justify-center">
+          <p className="text-gray-400">Pie chart coming soon</p>
+        </div>
+      </div>
 
-      {/* Table Section */}
-      <section>
-        <h2 className="text-2xl font-bold mb-4">Compliance Reports</h2>
-        {loadingReports ? (
-          <p>Loading reports...</p>
-        ) : (
-          <div className="overflow-x-auto bg-white rounded-2xl shadow">
-            <table className="min-w-full table-fixed border border-gray-200 divide-y divide-gray-100 text-sm">
-              <thead className="bg-gray-100 text-left font-semibold text-gray-700">
-                <tr>
-                  <th className="p-4">Title</th>
-                  <th className="p-4">Status</th>
-                  <th className="p-4">Date</th>
-                  <th className="p-4">HIPAA Document</th>
-                  <th className="p-4">Type</th>
-                  <th className="p-4">Submitted By</th>
-                  <th className="p-4">Reviewed By</th>
-                  <th className="p-4">Risk Level</th>
-                  <th className="p-4">Audit Type</th>
-                  <th className="p-4">Tags</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {reports.map((report) => (
-                  <tr key={report.id}>
-                    <td className="p-4">{report.title}</td>
-                    <td className="p-4">{report.status}</td>
-                    <td className="p-4">{report.date}</td>
-                    <td className="p-4">
-                      {report.document ? (
-                        <a
-                          href={
-                            report.document.startsWith("http")
-                              ? report.document
-                              : `http://127.0.0.1:8000${report.document}`
-                          }
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 underline"
-                        >
-                          View Document
-                        </a>
-                      ) : (
-                        "No document"
-                      )}
-                    </td>
-                    <td className="p-4">{report.type}</td>
-                    <td className="p-4">{report.submittedBy}</td>
-                    <td className="p-4">{report.reviewedBy}</td>
-                    <td className="p-4">{report.riskLevel}</td>
-                    <td className="p-4">{report.auditType}</td>
-                    <td className="p-4">
-                      {report.tags?.length ? report.tags.join(", ") : "—"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* Form to Submit New Report */}
+      <div className="bg-white p-6 rounded shadow space-y-4">
+        <h2 className="text-xl font-semibold">Submit New Compliance Report</h2>
+        <form className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Report Date</label>
+            <input type="date" className="w-full p-2 border rounded" />
           </div>
-        )}
-      </section>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <select className="w-full p-2 border rounded">
+              <option>HIPAA</option>
+              <option>PCI</option>
+              <option>GDPR</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Upload Document</label>
+            <input type="file" className="w-full p-2 border rounded" />
+          </div>
+          <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
+            Submit Report
+          </button>
+        </form>
+      </div>
+
+      {/* Compliance Reports Table */}
+      <div className="bg-white p-6 rounded shadow">
+        <h2 className="text-xl font-semibold mb-4">Compliance Reports</h2>
+        <table className="w-full table-auto border-collapse">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="text-left p-2 border">Report Name</th>
+              <th className="text-left p-2 border">Category</th>
+              <th className="text-left p-2 border">Date</th>
+              <th className="text-left p-2 border">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="p-2 border">Report 1</td>
+              <td className="p-2 border">HIPAA</td>
+              <td className="p-2 border">2025-03-01</td>
+              <td className="p-2 border text-green-600">Compliant</td>
+            </tr>
+            <tr>
+              <td className="p-2 border">Report 2</td>
+              <td className="p-2 border">PCI</td>
+              <td className="p-2 border">2025-03-03</td>
+              <td className="p-2 border text-red-600">Non-Compliant</td>
+            </tr>
+            <tr>
+              <td className="p-2 border">Report 3</td>
+              <td className="p-2 border">GDPR</td>
+              <td className="p-2 border">2025-03-05</td>
+              <td className="p-2 border text-green-600">Compliant</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
