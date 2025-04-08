@@ -123,7 +123,6 @@ export default function ComplianceReports() {
   const latestReportDate = reports.length > 0 ? reports[0].date : "N/A";
 
 
-export default function ComplianceReports() {
   return (
     <div className="p-6 bg-gray-50 min-h-screen space-y-6">
       {/* Top Summary Cards */}
@@ -212,4 +211,4 @@ export default function ComplianceReports() {
       </div>
     </div>
   );
-}
+
