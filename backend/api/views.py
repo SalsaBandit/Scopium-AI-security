@@ -400,6 +400,6 @@ def change_password(request):
             profile.save()
 
         log_event(event=f"{user.username} changed their password", user=user)
-        return JsonResponse({"success": True, "message": "Password updated successfully"})
+        return JsonResponse({"success": True})
     except Exception as e:
         return JsonResponse({"success": False, "message": str(e)}, status=500)

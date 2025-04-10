@@ -69,6 +69,7 @@ function App() {
     const [accessLevel, setAccessLevel] = useState(parseInt(localStorage.getItem("access_level")) || 1);
     const [allUsers, setAllUsers] = useState([]);
     const [passwordChangeError, setPasswordChangeError] = useState("");
+    const [showPasswordSuccess, setShowPasswordSuccess] = useState(false);
     const [profileId, setProfileId] = useState("");
 
     // Fetch a welcome message from the backend.
@@ -294,7 +295,8 @@ function App() {
     return (
         <>
             {!isAuthenticated && <Login onLoginSuccess={handleLoginSuccess} />}
-            <div className={`dashboard ${!isAuthenticated ? "blur-background" : ""}`}>
+            <div className="dashboard-wrapper">
+                <div className={`dashboard ${(!isAuthenticated || showPasswordSuccess) ? "blur-background" : ""}`}>
                 <header className="header">
                         <h1 className="header-user">{message}</h1>
                             <div className="header-buttons">
@@ -506,8 +508,7 @@ function App() {
                                     {/* Change Password Section */}
                                     <div className="section account" style={{ maxWidth: '100%', marginTop: '10px' }}>
                                         <h2>Change Password</h2>
-                                        <form
-                                            onSubmit={async (e) => {
+                                        <form onSubmit={async (e) => {
                                                 e.preventDefault();
                                                 const new_password = e.target.new_password.value;
                                                 const confirm_password = e.target.confirm_password.value;
@@ -527,10 +528,13 @@ function App() {
                                                 });
 
                                                 const result = await response.json();
-                                                alert(result?.message || "Password update attempt failed.");
+                                                //alert(result?.message || "Password update attempt failed.");
                                                 if (result.success) {
                                                     e.target.reset();
-                                                    setActiveSection("Account");
+                                                    setShowPasswordSuccess(true);  // Show success box
+                                                } 
+                                                else {
+                                                    setPasswordChangeError(result.message || "Password update attempt failed.");
                                                 }
                                             }}
                                             style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '100%' }}
@@ -686,6 +690,46 @@ function App() {
                     })()} {/*End account section.*/}
                 </div>
             </div>
+            </div>
+            {showPasswordSuccess && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 1000,
+                }}>
+                    <div style={{
+                        backgroundColor: '#fff',
+                        padding: '30px',
+                        borderRadius: '12px',
+                        maxWidth: '400px',
+                        textAlign: 'center',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
+                    }}>
+                        <h3 style={{ color: '#2e7d32' }}>Password Changed</h3>
+                        <p style={{ margin: '15px 0' }}>Please log in again with your new password.</p>
+                        <button
+                            style={{ ...buttonStyle, padding: '8px 20px' }}
+                            onClick={() => {
+                                setShowPasswordSuccess(false);
+                                setIsAuthenticated(false);
+                                localStorage.removeItem("username");
+                                localStorage.removeItem("role");
+                                localStorage.removeItem("access_level");
+                                setActiveSection("login");
+                            }}
+                        >
+                            OK
+                        </button>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
