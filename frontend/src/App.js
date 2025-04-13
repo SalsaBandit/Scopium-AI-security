@@ -51,7 +51,7 @@ function App() {
     const [activeSection, setActiveSection] = useState("Home"); // State to manage displayed content section.
     const [isAuthenticated, setIsAuthenticated] = useState(false); // Track login status.
     const [logs, setLogs] = useState([]); // Stores log data.
-    const [recentLogs, setRecentLogs] = useState([]); // Store only 10 recent logs.
+    const [recentLogs, setRecentLogs] = useState([]); // Store only 5 recent logs.
     const [chartData, setChartData] = useState(null);
     const [searchTerm, setSearchTerm] = useState(""); // Search term for filtering logs.
     const [sortField, setSortField] = useState("timestamp"); // Field to sort by.
@@ -321,9 +321,6 @@ function App() {
                                 <button onClick={() => toggleWidget('alerts')}>
                                     {visibleWidgets.alerts ? 'Hide' : 'Show'} Alerts
                                 </button>
-                                <button onClick={() => toggleWidget('transfers')}>
-                                    {visibleWidgets.transfers ? 'Hide' : 'Show'} Data Transfers
-                                </button>
                                 <button onClick={() => toggleWidget('logs')}>
                                     {visibleWidgets.logs ? 'Hide' : 'Show'} Logs
                                 </button>
@@ -335,16 +332,16 @@ function App() {
                             {visibleWidgets.alerts && (
                                 <div className="section recent-alerts">
                                     <h2>Recent Alerts</h2>
-                                    <p>A list view with color-coded severity levels (critical, high, moderate).</p>
-                                    <p>Mark as reviewed, etc.</p>
-                                </div>
-                            )}
-
-                            {visibleWidgets.transfers && (
-                                <div className="section data-transfer-monitor">
-                                    <h2>Data Transfer Monitor</h2>
-                                    <p>A bar chart showing transfer volumes over time.</p>
-                                    <p>Selecting a bar drills down into detailed analysis (user, destination, data type).</p>
+                                    <ul className="alert-list">
+                                        {logs
+                                            .filter(log => log.event.toLowerCase().includes("failed login"))
+                                            .slice(0, 5) // Show only 5 recent failed login attempts.
+                                            .map((log, index) => (
+                                                <li key={index} className="alert-item alert-warning">
+                                                    <strong>{log.timestamp}</strong> — {log.event}
+                                                </li>
+                                            ))}
+                                    </ul>
                                 </div>
                             )}
 

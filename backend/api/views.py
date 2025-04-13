@@ -98,16 +98,17 @@ def login_view(request):
         if user is not None:
             login(request, user)
 
-            # Ensure session is properly stored before logging event
+            # Ensure session is properly stored before logging event.
             request.session['user_id'] = user.id
             request.session.modified = True
             request.session.save()
 
-            # Log the event only once, ensuring the user is attached
+            # Log successful login.
             log_event(event=f"{user.username} logged in", user=user)
-
             return JsonResponse({'success': True, 'message': 'Login successful'})
         else:
+            # Log failed login attempt.
+            log_event(event=f"Failed login attempt for username: {username}", user=None)
             return JsonResponse({'success': False, 'message': 'Invalid credentials'}, status=401)
 
     return JsonResponse({'error': 'Invalid request method'}, status=400)
@@ -216,9 +217,9 @@ def get_recent_logs(request):
     profile = getattr(user, "profile", None)
 
     if profile and profile.role == "admin" and profile.access_level == 5:
-        logs = EventLog.objects.select_related("user").order_by("-timestamp")[:10]
+        logs = EventLog.objects.select_related("user").order_by("-timestamp")[:5]
     else:
-        logs = EventLog.objects.select_related("user").filter(user=user).order_by("-timestamp")[:10]
+        logs = EventLog.objects.select_related("user").filter(user=user).order_by("-timestamp")[:5]
 
     log_data = [
         {

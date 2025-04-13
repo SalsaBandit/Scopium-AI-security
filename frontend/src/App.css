@@ -13,7 +13,6 @@ body {
     display: grid;
     grid-template-rows: auto 50px 1fr;
     grid-template-columns: 1fr;
-    height: 100vh;
 }
 
 .header {
@@ -93,6 +92,7 @@ body {
     border: 1px solid #ddd;
     border-radius: 5px;
     box-shadow: 0px 0px 16px rgba(0, 0, 0, 1);
+    height: 50vh;
 }
 
 /* CSS Styling for Home toggle widget bar. */
@@ -274,8 +274,25 @@ th.timestamp-column, th.user-id-column {
     grid-column: span 1;
 }
 
-.data-transfer-monitor {
-    grid-column: span 1;
+/* Alert List Styling */
+.alert-list {
+    list-style: none;
+    padding-left: 0;
+    margin-top: 1rem;
+}
+
+.alert-item {
+    padding: 10px;
+    border-left: 5px solid transparent;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    background-color: #f7f7f7;
+}
+
+/* Severity Color Coding */
+.alert-warning {
+    border-left-color: #fdd835;
+    background-color: #fffde7;
 }
 
 .recent-logs {
