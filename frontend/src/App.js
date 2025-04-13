@@ -71,6 +71,9 @@ function App() {
     const [passwordChangeError, setPasswordChangeError] = useState("");
     const [showPasswordSuccess, setShowPasswordSuccess] = useState(false);
     const [profileId, setProfileId] = useState("");
+    const [eventType, setEventType] = useState("");
+    const [exportUserId, setExportUserId] = useState("");
+    const [exportTimestamp, setExportTimestamp] = useState("");
 
     // Fetch a welcome message from the backend.
     useEffect(() => {
@@ -396,12 +399,37 @@ function App() {
                     {activeSection === "User Activity Logs" && (
                         <div className="section user-activity-logs">
                             <div className="log-section-container">
-                                {/*Panel to export logs.*/}
+                                {/* Panel to export logs with filters */}
                                 <div className="log-exporting">
                                     <div className="export-controls">
+                                        <input
+                                            type="text"
+                                            placeholder="Filter by Event Type"
+                                            value={eventType}
+                                            onChange={(e) => setEventType(e.target.value)}
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Filter by User ID"
+                                            value={exportUserId}
+                                            onChange={(e) => setExportUserId(e.target.value)}
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Filter by Timestamp"
+                                            value={exportTimestamp}
+                                            onChange={(e) => setExportTimestamp(e.target.value)}
+                                        />
                                         <button
                                             onClick={() => {
-                                                const json = JSON.stringify(filteredLogs, null, 2);
+                                                const exportFiltered = filteredLogs.filter(log => {
+                                                    const matchesEvent = eventType ? log.event?.toLowerCase().includes(eventType.toLowerCase()) : true;
+                                                    const matchesUser = exportUserId ? (log.profile_id || "").toString() === exportUserId : true;
+                                                    const matchesTime = exportTimestamp ? log.timestamp.startsWith(exportTimestamp) : true;
+                                                    return matchesEvent && matchesUser && matchesTime;
+                                                });
+
+                                                const json = JSON.stringify(exportFiltered, null, 2);
                                                 const blob = new Blob([json], { type: "application/json" });
                                                 const url = URL.createObjectURL(blob);
                                                 const link = document.createElement("a");
