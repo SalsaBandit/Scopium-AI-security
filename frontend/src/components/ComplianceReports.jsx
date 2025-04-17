@@ -7,7 +7,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import SubmitReport from "../components/SubmitReport"; // ✅ Import the upload form
+import SubmitReport from "../components/SubmitReport";
 
 export default function ComplianceReports() {
   const [reports, setReports] = useState([]);
@@ -21,113 +21,76 @@ export default function ComplianceReports() {
       })
       .then((data) => {
         if (!Array.isArray(data) || data.length === 0) {
-          data = [
-            {
-              id: 1,
-              title: "March HIPAA Audit",
-              status: "Compliant",
-              date: "2025-03-01",
-              document: "/documents/march_audit.pdf",
-              type: "Privacy Review",
-              submittedBy: "Dr. Smith",
-              reviewedBy: "Compliance Team",
-              riskLevel: "Low",
-              auditType: "Internal",
-              tags: ["HIPAA", "Quarterly Audit"],
-            },
-            {
-              id: 2,
-              title: "Unauthorized Access Log",
-              status: "Non-Compliant",
-              date: "2025-03-15",
-              document: null,
-              type: "Security Incident",
-              submittedBy: "IT Admin",
-              reviewedBy: "Security Lead",
-              riskLevel: "High",
-              auditType: "External",
-              tags: ["Access Violation"],
-            },
-            {
-              id: 3,
-              title: "Quarterly Data Export",
-              status: "Compliant",
-              date: "2025-03-25",
-              document: "/documents/q1_export.pdf",
-              type: "Data Handling",
-              submittedBy: "Records Manager",
-              reviewedBy: "Compliance Team",
-              riskLevel: "Medium",
-              auditType: "Internal",
-              tags: ["PHI", "Export"],
-            },
-          ];
+          data = fallbackData;
         }
-
         setReports(data);
         setLoadingReports(false);
       })
       .catch((error) => {
         console.error("Error fetching reports:", error);
-        setReports([
-          {
-            id: 1,
-            title: "March HIPAA Audit",
-            status: "Compliant",
-            date: "2025-03-01",
-            document: "/documents/march_audit.pdf",
-            type: "Privacy Review",
-            submittedBy: "Dr. Smith",
-            reviewedBy: "Compliance Team",
-            riskLevel: "Low",
-            auditType: "Internal",
-            tags: ["HIPAA", "Quarterly Audit"],
-          },
-          {
-            id: 2,
-            title: "Unauthorized Access Log",
-            status: "Non-Compliant",
-            date: "2025-03-15",
-            document: null,
-            type: "Security Incident",
-            submittedBy: "IT Admin",
-            reviewedBy: "Security Lead",
-            riskLevel: "High",
-            auditType: "External",
-            tags: ["Access Violation"],
-          },
-          {
-            id: 3,
-            title: "Quarterly Data Export",
-            status: "Compliant",
-            date: "2025-03-25",
-            document: "/documents/q1_export.pdf",
-            type: "Data Handling",
-            submittedBy: "Records Manager",
-            reviewedBy: "Compliance Team",
-            riskLevel: "Medium",
-            auditType: "Internal",
-            tags: ["PHI", "Export"],
-          },
-        ]);
+        setReports(fallbackData);
         setLoadingReports(false);
       });
   }, []);
 
+  const fallbackData = [
+    {
+      id: 1,
+      title: "March HIPAA Audit",
+      status: "Compliant",
+      date: "2025-03-01",
+      document: "/documents/march_audit.pdf",
+      type: "Privacy Review",
+      submittedBy: "Dr. Smith",
+      reviewedBy: "Compliance Team",
+      riskLevel: "Low",
+      auditType: "Internal",
+      tags: ["HIPAA", "Quarterly Audit"],
+    },
+    {
+      id: 2,
+      title: "Unauthorized Access Log",
+      status: "Non-Compliant",
+      date: "2025-03-15",
+      document: null,
+      type: "Security Incident",
+      submittedBy: "IT Admin",
+      reviewedBy: "Security Lead",
+      riskLevel: "High",
+      auditType: "External",
+      tags: ["Access Violation"],
+    },
+    {
+      id: 3,
+      title: "Quarterly Data Export",
+      status: "Compliant",
+      date: "2025-03-25",
+      document: "/documents/q1_export.pdf",
+      type: "Data Handling",
+      submittedBy: "Records Manager",
+      reviewedBy: "Compliance Team",
+      riskLevel: "Medium",
+      auditType: "Internal",
+      tags: ["PHI", "Export"],
+    },
+  ];
+
   const totalReports = reports.length;
-  const nonCompliantReports = reports.filter(
-    (r) => r.status && r.status.toLowerCase().includes("non")
+  const nonCompliantReports = reports.filter((r) =>
+    r.status?.toLowerCase().includes("non")
   ).length;
   const compliantReports = totalReports - nonCompliantReports;
   const reportsWithDocs = reports.filter((r) => r.document).length;
   const latestReportDate = reports.length > 0 ? reports[0].date : "N/A";
 
   return (
-    <div className="p-4 space-y-8">
-      {/* Summary + Chart Side by Side */}
-      <section className="flex flex-col lg:flex-row justify-between gap-6 mt-4">
-        {/* Summary Cards */}
-        <div className="grid grid-cols-2 gap-4 flex-grow max-w-[60%]">
+    <div className="p-6 space-y-10">
+      <h1 className="text-3xl font-bold">Compliance Dashboard</h1>
+      <hr className="border-gray-300" />
+
+      {/* Summary + Chart */}
+      <section className="flex flex-col lg:flex-row justify-between gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-grow max-w-[60%]">
           <div className="bg-white rounded-2xl shadow p-4">
             <p className="text-gray-500 text-sm">Total Reports</p>
             <h2 className="text-xl font-semibold">{totalReports}</h2>
@@ -148,7 +111,7 @@ export default function ComplianceReports() {
           </div>
         </div>
 
-        {/* Pie Chart to the right */}
+        {/* Pie Chart */}
         <div className="bg-white rounded-2xl shadow p-4 w-full lg:w-[400px] self-start">
           <h3 className="text-lg font-semibold mb-4 text-center">
             Compliance Overview
@@ -177,14 +140,16 @@ export default function ComplianceReports() {
         </div>
       </section>
 
-      {/* ✅ Upload Form Section */}
-      <div className="bg-white p-4 rounded-2xl shadow mb-8">
-        <h2 className="text-xl font-bold mb-4">Submit a New Compliance Report</h2>
+      {/* Upload Form */}
+      <div className="bg-white p-4 rounded-2xl shadow">
+        <h2 className="text-xl font-bold mb-4">
+          Submit a New Compliance Report
+        </h2>
         <SubmitReport />
       </div>
 
       {/* Reports Table */}
-      <section>
+      <div className="bg-white p-4 rounded-2xl shadow">
         <h2 className="text-xl font-bold mb-4">Compliance Reports</h2>
         {loadingReports ? (
           <p>Loading reports...</p>
@@ -207,7 +172,10 @@ export default function ComplianceReports() {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {reports.map((report) => (
-                  <tr key={report.id}>
+                  <tr
+                    key={report.id}
+                    className="hover:bg-gray-100 transition-colors duration-200"
+                  >
                     <td className="p-3">{report.title}</td>
                     <td className="p-3">{report.status}</td>
                     <td className="p-3">{report.date}</td>
@@ -243,7 +211,7 @@ export default function ComplianceReports() {
             </table>
           </div>
         )}
-      </section>
+      </div>
     </div>
   );
 }
