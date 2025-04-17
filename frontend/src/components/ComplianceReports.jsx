@@ -7,7 +7,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import SubmitReport from "../components/SubmitReport";
+import SubmitReport from "./SubmitReport"; // Adjust path if needed
 
 export default function ComplianceReports() {
   const [reports, setReports] = useState([]);
@@ -15,19 +15,12 @@ export default function ComplianceReports() {
 
   useEffect(() => {
     fetch("http://127.0.0.1:8000/api/compliance/reports/")
-      .then((response) => {
-        if (!response.ok) throw new Error("API error");
-        return response.json();
-      })
+      .then((res) => res.json())
       .then((data) => {
-        if (!Array.isArray(data) || data.length === 0) {
-          data = fallbackData;
-        }
         setReports(data);
         setLoadingReports(false);
       })
-      .catch((error) => {
-        console.error("Error fetching reports:", error);
+      .catch(() => {
         setReports(fallbackData);
         setLoadingReports(false);
       });
@@ -86,33 +79,33 @@ export default function ComplianceReports() {
   return (
     <div className="p-6 space-y-10">
       <h1 className="text-3xl font-bold">Compliance Dashboard</h1>
-      <hr className="border-gray-300" />
 
-      {/* Summary + Chart */}
-      <section className="flex flex-col lg:flex-row justify-between gap-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-grow max-w-[60%]">
-          <div className="bg-white rounded-2xl shadow p-4">
+      {/* Summary Cards + Pie Chart */}
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
+          <div className="bg-white shadow rounded-2xl p-4">
             <p className="text-gray-500 text-sm">Total Reports</p>
             <h2 className="text-xl font-semibold">{totalReports}</h2>
           </div>
-          <div className="bg-white rounded-2xl shadow p-4">
+          <div className="bg-white shadow rounded-2xl p-4">
             <p className="text-gray-500 text-sm">Compliant Reports</p>
             <h2 className="text-xl font-semibold text-green-600">
               {compliantReports}
             </h2>
           </div>
-          <div className="bg-white rounded-2xl shadow p-4">
+          <div className="bg-white shadow rounded-2xl p-4">
             <p className="text-gray-500 text-sm">Reports with HIPAA Docs</p>
             <h2 className="text-xl font-semibold">{reportsWithDocs}</h2>
           </div>
-          <div className="bg-white rounded-2xl shadow p-4">
+          <div className="bg-white shadow rounded-2xl p-4">
             <p className="text-gray-500 text-sm">Latest Report Date</p>
             <h2 className="text-xl font-semibold">{latestReportDate}</h2>
           </div>
         </div>
 
         {/* Pie Chart */}
-        <div className="bg-white rounded-2xl shadow p-4 w-full lg:w-[400px] self-start">
+        <div className="bg-white shadow rounded-2xl p-4 w-full lg:w-[400px]">
           <h3 className="text-lg font-semibold mb-4 text-center">
             Compliance Overview
           </h3>
@@ -138,25 +131,23 @@ export default function ComplianceReports() {
             </PieChart>
           </ResponsiveContainer>
         </div>
-      </section>
+      </div>
 
-      {/* Upload Form */}
-      <div className="bg-white p-4 rounded-2xl shadow">
-        <h2 className="text-xl font-bold mb-4">
-          Submit a New Compliance Report
-        </h2>
+      {/* Submit Report */}
+      <div className="bg-white p-6 rounded-2xl shadow">
+        <h2 className="text-xl font-bold mb-4">Submit a New Compliance Report</h2>
         <SubmitReport />
       </div>
 
-      {/* Reports Table */}
-      <div className="bg-white p-4 rounded-2xl shadow">
+      {/* Table */}
+      <div className="bg-white p-6 rounded-2xl shadow">
         <h2 className="text-xl font-bold mb-4">Compliance Reports</h2>
         {loadingReports ? (
-          <p>Loading reports...</p>
+          <p>Loading...</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full table-fixed border border-gray-300 divide-y divide-gray-200 text-sm">
-              <thead className="bg-gray-200 text-left font-semibold text-gray-700">
+            <table className="min-w-full table-auto border border-gray-200 text-sm">
+              <thead className="bg-gray-100 text-left text-gray-700 font-semibold">
                 <tr>
                   <th className="p-3">Title</th>
                   <th className="p-3">Status</th>
@@ -170,11 +161,11 @@ export default function ComplianceReports() {
                   <th className="p-3">Tags</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody>
                 {reports.map((report) => (
                   <tr
                     key={report.id}
-                    className="hover:bg-gray-100 transition-colors duration-200"
+                    className="hover:bg-gray-50 transition duration-200"
                   >
                     <td className="p-3">{report.title}</td>
                     <td className="p-3">{report.status}</td>
@@ -182,16 +173,12 @@ export default function ComplianceReports() {
                     <td className="p-3">
                       {report.document ? (
                         <a
-                          href={
-                            report.document.startsWith("http")
-                              ? report.document
-                              : `http://127.0.0.1:8000${report.document}`
-                          }
+                          href={`http://127.0.0.1:8000${report.document}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-600 underline"
                         >
-                          View Document
+                          View
                         </a>
                       ) : (
                         "No document"
