@@ -46,6 +46,24 @@ const buttonStyle = {
     fontFamily: 'inherit'
 };
 
+const runForensicTool = async (tool) => {
+    try {
+        const response = await fetch(`tools/${tool}/`, {
+            method: 'GET',
+            credentials: 'include', // Include credentials for session management
+        });
+        const data = await response.json();
+        if (data.success) {
+            alert(`Tool ${tool} executed successfully.`);
+        } else {
+            alert(`Error executing tool: ${data.message}`);
+        }    
+    } catch (error) {
+        console.error("Error executing forensic tool:", error);
+        alert("An error occurred while executing the tool.");
+    }
+};
+
 function App() {
     const [message, setMessage] = useState("");
     const [activeSection, setActiveSection] = useState("Home"); // State to manage displayed content section.
@@ -495,6 +513,8 @@ function App() {
                         <div className="section forensic-tools">
                             <h2>Forensic Tools</h2>
                             <p>Tools for forensic analysis are displayed here.</p>
+                            <button onClick={() => runForensicTool('run_tool_1')}>Run Tool 1</button>
+                            <button onClick={() => runForensicTool('run_tool_2')}>Run Tool 2</button>
                         </div>
                     )} {/*End Forensic Tools section.*/}
 

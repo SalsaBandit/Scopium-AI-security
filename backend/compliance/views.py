@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import ComplianceReport
-from .serializers import ComplianceReportSerializer
+from .serializers import ComplianceReportSerializer, ComplianceViolationSerializer
 from .models import ComplianceReport, ComplianceViolation
 
 
