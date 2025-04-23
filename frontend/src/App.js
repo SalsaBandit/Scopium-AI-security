@@ -93,6 +93,38 @@ function App() {
     const [exportUserId, setExportUserId] = useState("");
     const [exportTimestamp, setExportTimestamp] = useState("");
 
+    const [selectedFile, setSelectedFile] = useState(null); // Move this inside the App function
+
+    const handleFileChange = (event) => {
+        setSelectedFile(event.target.files[0]);
+    };
+
+    const uploadAndRunTool = async (file) => {
+        if (!file) {
+            alert("Please select a log file to upload and analyze.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("logfile", file);
+
+        try {
+            const response = await fetch('tools/run_tool_1/', {
+                method: 'POST',
+                body: formData,
+            });
+            const data = await response.json();
+            if (data.success) {
+                alert(`Tool Output:\n${data.output}`);
+            } else {
+                alert(`Error: ${data.error}`);
+            }
+        } catch (error) {
+            console.error("Error uploading and running tool:", error);
+            alert("An error occurred while uploading and running the tool.");
+        }
+    };
+
     // Fetch a welcome message from the backend.
     useEffect(() => {
         if (isAuthenticated) {
@@ -513,7 +545,8 @@ function App() {
                         <div className="section forensic-tools">
                             <h2>Forensic Tools</h2>
                             <p>Tools for forensic analysis are displayed here.</p>
-                            <button onClick={() => runForensicTool('run_tool_1')}>Log analysis</button>
+                            <input type="file" onChange={handleFileChange} />
+                            <button onClick={() => uploadAndRunTool(selectedFile)}>Analyze Log</button>
                             <button onClick={() => runForensicTool('run_tool_2')}>File activity monitor</button>
                         </div>
                     )} {/*End Forensic Tools section.*/}
