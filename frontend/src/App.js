@@ -513,8 +513,8 @@ function App() {
                         <div className="section forensic-tools">
                             <h2>Forensic Tools</h2>
                             <p>Tools for forensic analysis are displayed here.</p>
-                            <button onClick={() => runForensicTool('run_tool_1')}>Run Tool 1</button>
-                            <button onClick={() => runForensicTool('run_tool_2')}>Run Tool 2</button>
+                            <button onClick={() => runForensicTool('run_tool_1')}>Log analysis</button>
+                            <button onClick={() => runForensicTool('run_tool_2')}>File activity monitor</button>
                         </div>
                     )} {/*End Forensic Tools section.*/}
 
