@@ -584,199 +584,182 @@ function App() {
 
                         return (
                             <>
-                                {/*Left-hand side information box.*/}
-                                <div className="section account">
+                                {/* Personal Information */}
+                                <div className="section">
                                     <h2>Personal Information</h2>
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginTop: '20px', flexDirection: 'column' }}>
-                                        <div className="section name-information" style={cardStyle}>
-                                            <h2>Name</h2>
-                                            <p>{fullName}</p>
-                                        </div>
-                                        <div className="section username-information" style={cardStyle}>
-                                            <h2>Username</h2>
-                                            <p>{username}</p>
-                                        </div>
-                                        <div className="section email-information" style={cardStyle}>
-                                            <h2>Email</h2>
-                                            <p>{email}</p>
-                                        </div>
-                                        <div className="section number-information" style={cardStyle}>
-                                            <h2>Phone Number</h2>
-                                            <p>{phoneNumber || "N/A"}</p>
-                                        </div>
+                                    <div className="section name-information" style={cardStyle}>
+                                    <h2>Name</h2>
+                                    <p>{fullName}</p>
                                     </div>
-                                    {/* Change Password Section */}
-                                    <div className="section account" style={{ maxWidth: '100%', marginTop: '10px' }}>
-                                        <h2>Change Password</h2>
-                                        <form onSubmit={async (e) => {
-                                            e.preventDefault();
-                                            const new_password = e.target.new_password.value;
-                                            const confirm_password = e.target.confirm_password.value;
+                                    <div className="section username-information" style={cardStyle}>
+                                    <h2>Username</h2>
+                                    <p>{username}</p>
+                                    </div>
+                                    <div className="section email-information" style={cardStyle}>
+                                    <h2>Email</h2>
+                                    <p>{email}</p>
+                                    </div>
+                                    <div className="section number-information" style={cardStyle}>
+                                    <h2>Phone Number</h2>
+                                    <p>{phoneNumber || "N/A"}</p>
+                                    </div>
+                                    <div className="section account" style={{ marginTop: '10px' }}>
+                                    <h2>Change Password</h2>
+                                    <form onSubmit={async (e) => {
+                                        e.preventDefault();
+                                        const new_password = e.target.new_password.value;
+                                        const confirm_password = e.target.confirm_password.value;
 
-                                            if (new_password !== confirm_password) {
-                                                setPasswordChangeError("Passwords do not match");
-                                                return;
-                                            }
+                                        if (new_password !== confirm_password) {
+                                        setPasswordChangeError("Passwords do not match");
+                                        return;
+                                        }
 
-                                            setPasswordChangeError("");
+                                        setPasswordChangeError("");
 
-                                            const response = await fetchWithAutoLogout("http://localhost:8000/api/change_password/", {
-                                                method: "POST",
-                                                headers: { "Content-Type": "application/json" },
-                                                credentials: "include",
-                                                body: JSON.stringify({ new_password, confirm_password }),
-                                            });
+                                        const response = await fetchWithAutoLogout("http://localhost:8000/api/change_password/", {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json" },
+                                        credentials: "include",
+                                        body: JSON.stringify({ new_password, confirm_password }),
+                                        });
 
-                                            if (!response) return; // session timed out, auto-logout triggered
+                                        if (!response) return;
 
-                                            if (response.success) {
-                                                e.target.reset();
-                                                setShowPasswordSuccess(true);  // Show success box
-                                            } else {
-                                                setPasswordChangeError(response.message || "Password update attempt failed.");
-                                            }
-                                        }} style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '100%' }}>
-                                            <input type="password" name="new_password" placeholder="New Password" required style={inputStyle} />
-                                            <input type="password" name="confirm_password" placeholder="Confirm Password" required style={inputStyle} />
-                                            <button type="submit" style={buttonStyle}>Change Password</button>
-                                            {passwordChangeError && (
-                                                <p style={{ color: 'red', fontSize: '0.9em' }}>{passwordChangeError}</p>
-                                            )}
-                                        </form>
+                                        if (response.success) {
+                                        e.target.reset();
+                                        setShowPasswordSuccess(true);
+                                        } else {
+                                        setPasswordChangeError(response.message || "Password update attempt failed.");
+                                        }
+                                    }} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                        <input type="password" name="new_password" placeholder="New Password" required style={inputStyle} />
+                                        <input type="password" name="confirm_password" placeholder="Confirm Password" required style={inputStyle} />
+                                        <button type="submit" style={buttonStyle}>Change Password</button>
+                                        {passwordChangeError && (
+                                        <p style={{ color: 'red', fontSize: '0.9em' }}>{passwordChangeError}</p>
+                                        )}
+                                    </form>
                                     </div>
                                 </div>
-                                {/*Right-hand side information box.*/}
-                                <div className="section account">
+
+                                {/* Additional Information */}
+                                <div className="section">
                                     <h2>Additional Information</h2>
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginTop: '20px', flexDirection: 'column' }}>
-                                        <div className="section role-information" style={cardStyle}>
-                                            <h2>User Role</h2>
-                                            <p>{userRole || "N/A"}</p>
-                                        </div>
-                                        <div className="section user-id-information" style={cardStyle}>
-                                            <h2>User ID</h2>
-                                            <p>{profileId || "N/A"}</p>
-                                        </div>
-                                        <div className="section account-information" style={cardStyle}>
-                                            <h2>Account Created</h2>
-                                            <p>{accountCreated}</p>
-                                        </div>
-                                        <div className="section login-information" style={cardStyle}>
-                                            <h2>Last Login</h2>
-                                            <p>{lastLogin}</p>
-                                        </div>
-                                        <div className="section password-information" style={cardStyle}>
-                                            <h2>Password Last Changed</h2>
-                                            <p>{passwordLastChanged}</p>
-                                        </div>
+                                    <div className="section role-information" style={cardStyle}>
+                                    <h2>User Role</h2>
+                                    <p>{userRole || "N/A"}</p>
+                                    </div>
+                                    <div className="section user-id-information" style={cardStyle}>
+                                    <h2>User ID</h2>
+                                    <p>{profileId || "N/A"}</p>
+                                    </div>
+                                    <div className="section account-information" style={cardStyle}>
+                                    <h2>Account Created</h2>
+                                    <p>{accountCreated}</p>
+                                    </div>
+                                    <div className="section login-information" style={cardStyle}>
+                                    <h2>Last Login</h2>
+                                    <p>{lastLogin}</p>
+                                    </div>
+                                    <div className="section password-information" style={cardStyle}>
+                                    <h2>Password Last Changed</h2>
+                                    <p>{passwordLastChanged}</p>
                                     </div>
                                 </div>
-                                {/* Create User Form & Delete User Form */}
+
+                                {/* Admin Controls */}
                                 {userRole === "admin" && accessLevel === 5 && (
-                                    <div style={{
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'stretch',
-                                        gap: '20px',
-                                        maxWidth: '600px',
-                                        width: '100%',
-                                    }}>
-                                        {/* Create User Form */}
-                                        <div className="section" style={{
+                                    <div className="section">
+                                    <div className="section" style={{
                                         border: '1px solid #4caf50',
                                         borderRadius: '8px',
                                         padding: '20px',
                                         backgroundColor: '#f9fff9',
                                         boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-                                        width: '100%'
-                                        }}>
+                                    }}>
                                         <h2>Add New User</h2>
                                         <form onSubmit={async (e) => {
-                                            e.preventDefault();
+                                        e.preventDefault();
+                                        const username = e.target.username.value;
+                                        const password = e.target.password.value;
+                                        const email = e.target.email.value;
+                                        const full_name = e.target.full_name.value;
+                                        const phone_number = e.target.phone_number.value;
+                                        const role = e.target.role.value;
+                                        const access_level = parseInt(e.target.access_level.value);
 
-                                            const username = e.target.username.value;
-                                            const password = e.target.password.value;
-                                            const email = e.target.email.value;
-                                            const full_name = e.target.full_name.value;
-                                            const phone_number = e.target.phone_number.value;
-                                            const role = e.target.role.value;
-                                            const access_level = parseInt(e.target.access_level.value);
+                                        const response = await fetchWithAutoLogout("/api/register/", {
+                                            method: "POST",
+                                            headers: { "Content-Type": "application/json" },
+                                            credentials: "include",
+                                            body: JSON.stringify({ username, password, email, full_name, phone_number, role, access_level })
+                                        });
 
-                                            const response = await fetchWithAutoLogout("/api/register/", {
-                                                method: "POST",
-                                                headers: { "Content-Type": "application/json" },
-                                                credentials: "include",
-                                                body: JSON.stringify({
-                                                    username, password, email, full_name, phone_number, role, access_level
-                                                })
-                                            });
+                                        if (!response) return;
 
-                                            if (!response) return;
-
-                                            alert(response.message);
-                                            e.target.reset();
+                                        alert(response.message);
+                                        e.target.reset();
                                         }} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                            <input type="text" name="username" placeholder="Username" required style={inputStyle} />
-                                            <input type="password" name="password" placeholder="Password" required style={inputStyle} />
-                                            <input type="text" name="full_name" placeholder="Full Name" style={inputStyle} />
-                                            <input type="text" name="email" placeholder="Email" style={inputStyle} />
-                                            <input type="text" name="phone_number" placeholder="Phone Number" style={inputStyle} />
-                                            <select name="role" defaultValue="user" style={inputStyle}>
+                                        <input type="text" name="username" placeholder="Username" required style={inputStyle} />
+                                        <input type="password" name="password" placeholder="Password" required style={inputStyle} />
+                                        <input type="text" name="full_name" placeholder="Full Name" style={inputStyle} />
+                                        <input type="text" name="email" placeholder="Email" style={inputStyle} />
+                                        <input type="text" name="phone_number" placeholder="Phone Number" style={inputStyle} />
+                                        <select name="role" defaultValue="user" style={inputStyle}>
                                             <option value="user">User</option>
                                             <option value="admin">Admin</option>
-                                            </select>
-                                            <input type="number" name="access_level" placeholder="Access Level" defaultValue="1" min="1" style={inputStyle} />
-                                            <button type="submit" style={buttonStyle}>Create User</button>
+                                        </select>
+                                        <input type="number" name="access_level" placeholder="Access Level" defaultValue="1" min="1" style={inputStyle} />
+                                        <button type="submit" style={buttonStyle}>Create User</button>
                                         </form>
-                                        </div>
+                                    </div>
 
-                                        {/* Delete User Form */}
-                                        <div className="section" style={{
+                                    <div className="section" style={{
                                         border: '1px solid #f44336',
                                         borderRadius: '8px',
                                         padding: '20px',
                                         backgroundColor: '#fff8f8',
                                         boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-                                        width: '100%'
-                                        }}>
+                                        marginTop: '20px'
+                                    }}>
                                         <h2>Delete User</h2>
                                         <form onSubmit={async (e) => {
-                                            e.preventDefault();
+                                        e.preventDefault();
+                                        const usernameToDelete = e.target.username.value;
+                                        if (!window.confirm(`Are you sure you want to delete user "${usernameToDelete}"?`)) return;
 
-                                            const usernameToDelete = e.target.username.value;
-                                            if (!window.confirm(`Are you sure you want to delete user "${usernameToDelete}"?`)) return;
+                                        const response = await fetchWithAutoLogout("/api/delete_user/", {
+                                            method: "DELETE",
+                                            headers: { "Content-Type": "application/json" },
+                                            credentials: "include",
+                                            body: JSON.stringify({ username: usernameToDelete })
+                                        });
 
-                                            const response = await fetchWithAutoLogout("/api/delete_user/", {
-                                                method: "DELETE",
-                                                headers: { "Content-Type": "application/json" },
-                                                credentials: "include",
-                                                body: JSON.stringify({ username: usernameToDelete })
-                                            });
+                                        if (!response) return;
 
-                                            if (!response) return;
+                                        alert(response.message);
+                                        e.target.reset();
 
-                                            alert(response.message);
-                                            e.target.reset();
-
-                                            const refreshed = await fetchWithAutoLogout("/api/list_users/", { credentials: "include" });
-                                            if (refreshed && refreshed.success) {
-                                                setAllUsers(refreshed.users);
-                                            }
-                                        }} style={{ display: 'flex', flexDirection: 'column', gap: '12px', margin: 0, padding: 0 }}>
-                                            <select name="username" required style={inputStyle}>
+                                        const refreshed = await fetchWithAutoLogout("/api/list_users/", { credentials: "include" });
+                                        if (refreshed && refreshed.success) {
+                                            setAllUsers(refreshed.users);
+                                        }
+                                        }} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                        <select name="username" required style={inputStyle}>
                                             <option value="">Select user to delete</option>
                                             {allUsers
-                                                .filter(u => u && u !== username) // prevent excluding empty/null usernames
-                                                .map((u, idx) => (
+                                            .filter(u => u && u !== username)
+                                            .map((u, idx) => (
                                                 <option key={idx} value={u}>{u}</option>
-                                                ))}
-                                            </select>
-                                            <button type="submit" style={{ ...buttonStyle, backgroundColor: '#f44336' }}>Delete User</button>
+                                            ))}
+                                        </select>
+                                        <button type="submit" style={{ ...buttonStyle, backgroundColor: '#f44336' }}>Delete User</button>
                                         </form>
-                                        </div>
                                     </div>
-                                    )}
-                            </>
+                                    </div>
+                                )}
+                                </>
                         );
                     })()} {/*End account section.*/}
                 </div>
