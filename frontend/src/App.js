@@ -93,7 +93,38 @@ function App() {
     const [exportUserId, setExportUserId] = useState("");
     const [exportTimestamp, setExportTimestamp] = useState("");
 
-    const [selectedFile, setSelectedFile] = useState(null); // Move this inside the App function
+    const [selectedFile, setSelectedFile] = useState(null);
+
+    const fetchWithAutoLogout = async (url, options = {}) => {
+        try {
+            const response = await fetch(url, { ...options, credentials: 'include' });
+    
+            if (response.status === 401) {
+                const username = localStorage.getItem("username");
+                if (username) {
+                    await fetch('/api/log_event/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            event: `${username} session timed out`,
+                            user: username
+                        }),
+                    });
+                }
+    
+                localStorage.clear();
+                setIsAuthenticated(false);
+                setActiveSection("login");
+                return null;
+            }
+    
+            return await response.json();
+        } catch (error) {
+            console.error("Fetch error:", error);
+            return null;
+        }
+    };
 
     const handleFileChange = (event) => {
         setSelectedFile(event.target.files[0]);
@@ -144,17 +175,21 @@ function App() {
     // Fetches logs from backend after authentication.
     useEffect(() => {
         if (isAuthenticated) {
-            axios.get('/api/get_logs/')
-                .then(response => setLogs(response.data.logs))
-                .catch(error => console.log(error));
+            const fetchLogs = async () => {
+                const data = await fetchWithAutoLogout('/api/get_logs/');
+                if (data) setLogs(data.logs);
+            };
+            fetchLogs();
         }
     }, [activeSection, isAuthenticated]);
 
     useEffect(() => {
         if (isAuthenticated) {
-            axios.get('/api/get_recent_logs/')
-                .then(response => setRecentLogs(response.data.logs))
-                .catch(error => console.log(error));
+            const fetchRecentLogs = async () => {
+                const data = await fetchWithAutoLogout('/api/get_recent_logs/');
+                if (data) setRecentLogs(data.logs);
+            };
+            fetchRecentLogs();
         }
     }, [activeSection, isAuthenticated]);
 
@@ -216,65 +251,32 @@ function App() {
     // Fetch Account page data.
     useEffect(() => {
         if (activeSection === "Account") {
-            axios.get('/api/account/')
-                .then(response => {
-                    /*if (response.data.boxes) {
-                        setAccountBoxes(response.data.boxes);
-                    }*/
-                    if (response.data.username) {
-                        setUsername(response.data.username);
-                    }
-                    if (response.data.email) {
-                        setEmail(response.data.email);
-                    }
-                    if (response.data.account_created) {
-                        setAccountCreated(response.data.account_created);
-                    }
-                    if (response.data.last_login) {
-                        setLastLogin(response.data.last_login);  // Store last login time.
-                    }
-                    if (response.data.full_name) {
-                        setFullName(response.data.full_name);  // Store full name.
-                    }
-                    if (response.data.phone_number) {
-                        setPhoneNumber(response.data.phone_number);  // Store phone number.
-                    }
-                    if (response.data.role) {
-                        setUserRole(response.data.role);  // Store user role.
-                    }
-                    if (response.data.password_last_changed) {
-                        setPasswordLastChanged(response.data.password_last_changed);
-                    }
-                    if (response.data.access_level !== undefined) {
-                        setAccessLevel(response.data.access_level);
-                    }
-                    if (response.data.profile_id) {
-                        setProfileId(response.data.profile_id);
-                    }
-                    /*const isAdmin = response.data.role === "admin" && response.data.access_level === 5;
-                    console.log("isAdmin:", isAdmin, "| role:", response.data.role, "| access_level:", response.data.access_level);
-                    if (isAdmin) {
-                        fetch("/api/list_users/", { credentials: "include" })
-                            .then(res => res.json())
-                            .then(data => {
-                                if (data.success) setAllUsers(data.users);
-                            })
-                            .catch(err => console.error("Error fetching users:", err));
-                    }*/
-                })
-                .catch(error => console.error('Error fetching account data:', error));
+            const fetchAccount = async () => {
+                const response = await fetchWithAutoLogout('/api/account/');
+                if (!response) return;
+    
+                if (response.username) setUsername(response.username);
+                if (response.email) setEmail(response.email);
+                if (response.account_created) setAccountCreated(response.account_created);
+                if (response.last_login) setLastLogin(response.last_login);
+                if (response.full_name) setFullName(response.full_name);
+                if (response.phone_number) setPhoneNumber(response.phone_number);
+                if (response.role) setUserRole(response.role);
+                if (response.password_last_changed) setPasswordLastChanged(response.password_last_changed);
+                if (response.access_level !== undefined) setAccessLevel(response.access_level);
+                if (response.profile_id) setProfileId(response.profile_id);
+            };
+            fetchAccount();
         }
     }, [activeSection]);
 
     useEffect(() => {
         if (userRole === "admin" && accessLevel === 5 && isAuthenticated) {
-            fetch("/api/list_users/", { credentials: "include" })
-                .then(res => res.json())
-                .then(data => {
-                    console.log("Fetched users (fallback useEffect):", data);
-                    if (data.success) setAllUsers(data.users);
-                })
-                .catch(err => console.error("Error fetching users (fallback):", err));
+            const fetchUsers = async () => {
+                const data = await fetchWithAutoLogout("/api/list_users/");
+                if (data && data.success) setAllUsers(data.users);
+            };
+            fetchUsers();
         }
     }, [userRole, accessLevel, isAuthenticated]);
 
@@ -332,14 +334,34 @@ function App() {
         }));
     };
 
-    const handleNavigation = (section) => {
+    const handleNavigation = async (section) => {
+        const response = await fetch('/api/account/', { credentials: 'include' });  // Use any protected route
+    
+        if (response.status === 401) {
+            const username = localStorage.getItem("username");
+            if (username) {
+                await fetch('/api/log_event/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        event: `${username} session timed out`,
+                        user: username
+                    }),
+                });
+            }
+    
+            localStorage.clear();
+            setIsAuthenticated(false);
+            setActiveSection("login");
+            return;
+        }
+    
         setActiveSection(section);
     
         fetch("/api/log_event/", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ event: `${username} navigated to ${section}`, user: username }),
         });
     };
@@ -587,36 +609,33 @@ function App() {
                                     <div className="section account" style={{ maxWidth: '100%', marginTop: '10px' }}>
                                         <h2>Change Password</h2>
                                         <form onSubmit={async (e) => {
-                                                e.preventDefault();
-                                                const new_password = e.target.new_password.value;
-                                                const confirm_password = e.target.confirm_password.value;
+                                            e.preventDefault();
+                                            const new_password = e.target.new_password.value;
+                                            const confirm_password = e.target.confirm_password.value;
 
-                                                if (new_password !== confirm_password) {
-                                                    setPasswordChangeError("Passwords do not match");
-                                                    return;
-                                                }
+                                            if (new_password !== confirm_password) {
+                                                setPasswordChangeError("Passwords do not match");
+                                                return;
+                                            }
 
-                                                setPasswordChangeError("");
+                                            setPasswordChangeError("");
 
-                                                const response = await fetch("http://localhost:8000/api/change_password/", {
-                                                    method: "POST",
-                                                    headers: { "Content-Type": "application/json" },
-                                                    credentials: "include",
-                                                    body: JSON.stringify({ new_password, confirm_password }),
-                                                });
+                                            const response = await fetchWithAutoLogout("http://localhost:8000/api/change_password/", {
+                                                method: "POST",
+                                                headers: { "Content-Type": "application/json" },
+                                                credentials: "include",
+                                                body: JSON.stringify({ new_password, confirm_password }),
+                                            });
 
-                                                const result = await response.json();
-                                                //alert(result?.message || "Password update attempt failed.");
-                                                if (result.success) {
-                                                    e.target.reset();
-                                                    setShowPasswordSuccess(true);  // Show success box
-                                                } 
-                                                else {
-                                                    setPasswordChangeError(result.message || "Password update attempt failed.");
-                                                }
-                                            }}
-                                            style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '100%' }}
-                                        >
+                                            if (!response) return; // session timed out, auto-logout triggered
+
+                                            if (response.success) {
+                                                e.target.reset();
+                                                setShowPasswordSuccess(true);  // Show success box
+                                            } else {
+                                                setPasswordChangeError(response.message || "Password update attempt failed.");
+                                            }
+                                        }} style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '100%' }}>
                                             <input type="password" name="new_password" placeholder="New Password" required style={inputStyle} />
                                             <input type="password" name="confirm_password" placeholder="Confirm Password" required style={inputStyle} />
                                             <button type="submit" style={buttonStyle}>Change Password</button>
@@ -674,6 +693,7 @@ function App() {
                                         <h2>Add New User</h2>
                                         <form onSubmit={async (e) => {
                                             e.preventDefault();
+
                                             const username = e.target.username.value;
                                             const password = e.target.password.value;
                                             const email = e.target.email.value;
@@ -682,21 +702,19 @@ function App() {
                                             const role = e.target.role.value;
                                             const access_level = parseInt(e.target.access_level.value);
 
-                                            try {
-                                            const response = await fetch("/api/register/", {
+                                            const response = await fetchWithAutoLogout("/api/register/", {
                                                 method: "POST",
                                                 headers: { "Content-Type": "application/json" },
                                                 credentials: "include",
-                                                body: JSON.stringify({ username, password, email, full_name, phone_number, role, access_level })
+                                                body: JSON.stringify({
+                                                    username, password, email, full_name, phone_number, role, access_level
+                                                })
                                             });
 
-                                            const result = await response.json();
-                                            alert(result.message);
+                                            if (!response) return;
+
+                                            alert(response.message);
                                             e.target.reset();
-                                            } catch (err) {
-                                            alert("Error: Could not register user.");
-                                            console.error(err);
-                                            }
                                         }} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                             <input type="text" name="username" placeholder="Username" required style={inputStyle} />
                                             <input type="password" name="password" placeholder="Password" required style={inputStyle} />
@@ -724,30 +742,25 @@ function App() {
                                         <h2>Delete User</h2>
                                         <form onSubmit={async (e) => {
                                             e.preventDefault();
-                                            const usernameToDelete = e.target.username.value;
 
+                                            const usernameToDelete = e.target.username.value;
                                             if (!window.confirm(`Are you sure you want to delete user "${usernameToDelete}"?`)) return;
 
-                                            try {
-                                            const response = await fetch("/api/delete_user/", {
-                                                method: "POST",
+                                            const response = await fetchWithAutoLogout("/api/delete_user/", {
+                                                method: "DELETE",
                                                 headers: { "Content-Type": "application/json" },
                                                 credentials: "include",
                                                 body: JSON.stringify({ username: usernameToDelete })
                                             });
 
-                                            const result = await response.json();
-                                            alert(result.message);
+                                            if (!response) return;
+
+                                            alert(response.message);
                                             e.target.reset();
 
-                                            // 🔄 Refresh the user list dropdown
-                                            const refreshed = await fetch("/api/list_users/", { credentials: "include" });
-                                            const data = await refreshed.json();
-                                            if (data.success) setAllUsers(data.users);
-
-                                            } catch (err) {
-                                            alert("Error: Could not delete user.");
-                                            console.error(err);
+                                            const refreshed = await fetchWithAutoLogout("/api/list_users/", { credentials: "include" });
+                                            if (refreshed && refreshed.success) {
+                                                setAllUsers(refreshed.users);
                                             }
                                         }} style={{ display: 'flex', flexDirection: 'column', gap: '12px', margin: 0, padding: 0 }}>
                                             <select name="username" required style={inputStyle}>

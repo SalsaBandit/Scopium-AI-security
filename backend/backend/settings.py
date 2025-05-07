@@ -151,3 +151,6 @@ SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+SESSION_COOKIE_AGE = 1800  # # Automatically log out users after 30 minutes (1800 seconds) of inactivity
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Session ends when browser is closed
+SESSION_SAVE_EVERY_REQUEST = True

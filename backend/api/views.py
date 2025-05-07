@@ -48,6 +48,10 @@ def hello_world(request):
 # API endpoint to retrieve all event logs in JSON format.
 def get_logs(request):
     user = request.user
+
+    if not user.is_authenticated:
+        return JsonResponse({"logs": []}, status=401)
+
     profile = getattr(user, "profile", None)
 
     if profile and profile.role == "admin" and profile.access_level == 5:
@@ -214,12 +218,16 @@ def account_page(request):
 @api_view(['GET'])
 def get_recent_logs(request):
     user = request.user
+
+    if not user.is_authenticated:
+        return JsonResponse({"logs": []}, status=401)
+
     profile = getattr(user, "profile", None)
 
     if profile and profile.role == "admin" and profile.access_level == 5:
-        logs = EventLog.objects.select_related("user").order_by("-timestamp")[:5]
+        logs = EventLog.objects.select_related("user").order_by("-timestamp")[:10]
     else:
-        logs = EventLog.objects.select_related("user").filter(user=user).order_by("-timestamp")[:5]
+        logs = EventLog.objects.select_related("user").filter(user=user).order_by("-timestamp")[:10]
 
     log_data = [
         {
